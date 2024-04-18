@@ -8,5 +8,8 @@ indent_size=4
 [*.bat]
 end_of_line=crlf
 
+[*.go]
+indent_style = tab
+
 [*.yml]
 indent_size=2
