@@ -2,9 +2,12 @@ module github.com/Siroshun09/plugin-list
 
 go 1.22.2
 
+// v0.124.0 of kin-openapi introduces compilation errors: https://github.com/deepmap/oapi-codegen/issues/1533
+replace github.com/getkin/kin-openapi => github.com/getkin/kin-openapi v0.123.0
+
 require (
 	github.com/deepmap/oapi-codegen/v2 v2.1.0
-	github.com/getkin/kin-openapi v0.123.0
+	github.com/getkin/kin-openapi v0.124.0
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/oapi-codegen/nethttp-middleware v1.0.1
 	github.com/oapi-codegen/runtime v1.1.1
