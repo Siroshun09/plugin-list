@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: plugin-list API
+  description: plugin-list API
+  version: 1.0.0
+
+paths:
+  /plugins/{server_name}:
+    get:
+      summary: Get the list of installed plugins
+      description: Get the list of plugins that are installed in the specified server
+      operationId: getPluginsByServer
+      parameters:
+        - name: server_name
+          in: path
+          description: the server name to get plugins
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the list of plugins that are installed in the specified server
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plugin'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Add or update the plugin
+      description: Add or update the plugin
+      operationId: addPlugin
+      parameters:
+        - name: server_name
+          in: path
+          description: the server name to get plugins
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Plugin to add to the list
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Plugin'
+      responses:
+        '200':
+          description: plugin response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plugin'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /plugins/{server_name}/{plugin_name}:
+    delete:
+      summary: Delete the specified plugin from the list
+      description: Delete the specified plugin from the list
+      operationId: deletePlugin
+      parameters:
+        - name: server_name
+          in: path
+          description: the server name to get information of the plugin
+          required: true
+          schema:
+            type: string
+        - name: plugin_name
+          in: path
+          description: the plugin name to get information of the plugin
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: plugin deleted
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Plugin:
+      allOf:
+        - properties:
+            plugin_name:
+              type: string
+              description: Name of the plugin
+            server_name:
+              type: string
+              description: Name of the server
+            file_name:
+              type: string
+              description: File name of the plugin
+            version:
+              type: string
+              description: Version of the plugin
+            type:
+              type: string
+              description: Type of the plugin
+              example: "bukkit_plugin"
+            last_updated:
+              type: integer
+              format: int64
+              description: Unix time when the plugin was last updated
+          required:
+            - plugin_name
+            - server_name
+            - file_name
+            - version
+            - type
+            - last_updated
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: Error code
+        message:
+          type: string
+          description: Error message
