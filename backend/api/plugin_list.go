@@ -44,18 +44,13 @@ func (p *PluginList) GetPluginsByServer(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	var result []Plugin
-	for _, p := range plugins {
-		result = append(result, toPlugin(p))
+	result := make([]Plugin, len(plugins))
+	for i, p := range plugins {
+		result[i] = toPlugin(p)
 	}
 
 	w.WriteHeader(http.StatusOK)
-	if result != nil {
-		_ = json.NewEncoder(w).Encode(result)
-	} else {
-		_ = json.NewEncoder(w).Encode(make([]Plugin, 0))
-	}
-
+	_ = json.NewEncoder(w).Encode(result)
 }
 
 func (p *PluginList) AddPlugin(w http.ResponseWriter, r *http.Request, serverName string) {
