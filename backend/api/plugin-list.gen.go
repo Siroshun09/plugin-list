@@ -62,6 +62,9 @@ type ServerInterface interface {
 	// Delete the specified plugin from the list
 	// (DELETE /plugins/{server_name}/{plugin_name})
 	DeletePlugin(w http.ResponseWriter, r *http.Request, serverName string, pluginName string)
+	// Get the list of servers
+	// (GET /servers/)
+	GetServerNames(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -83,6 +86,12 @@ func (_ Unimplemented) AddPlugin(w http.ResponseWriter, r *http.Request, serverN
 // Delete the specified plugin from the list
 // (DELETE /plugins/{server_name}/{plugin_name})
 func (_ Unimplemented) DeletePlugin(w http.ResponseWriter, r *http.Request, serverName string, pluginName string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get the list of servers
+// (GET /servers/)
+func (_ Unimplemented) GetServerNames(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -173,6 +182,21 @@ func (siw *ServerInterfaceWrapper) DeletePlugin(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeletePlugin(w, r, serverName, pluginName)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetServerNames operation middleware
+func (siw *ServerInterfaceWrapper) GetServerNames(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetServerNames(w, r)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -304,6 +328,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Delete(options.BaseURL+"/plugins/{server_name}/{plugin_name}", wrapper.DeletePlugin)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/servers/", wrapper.GetServerNames)
+	})
 
 	return r
 }
@@ -311,18 +338,19 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8xWy27bOhD9FWLuXepavknQhXYJ+kA2bYA+NoERsOLIZiORDDlKYhj694KkFFkPt2md",
-	"RVaSNZzDMzNnZryDXFdGK1TkINuByzdY8fD6zlpt/Yux2qAlieFzrgX6p0CXW2lIagVZPMyCLYFC24oT",
-	"ZCAVnZ5AArQ1GH/iGi00CVToHF8fBOrMT66OrFRraJoELN7V0qKA7BraC7vjqyaBq7JeS+WBeVl+KiC7",
-	"HkdQyBJvFK9mbn8vS2TexHTBaIPMRLQJjwRK7uimNoKTpzIG+qrkIyNZIXvYoNqDYg/cMe/LOt9hvt6c",
-	"zeYrOh9g/fFZhB3ae7TPgIgH5yDih7Hvl62ZXo+PvDKld/9e395KujlM7B6tC0hj4G/R8LvQRprYT9Uw",
-	"6mSv9P21Ld6ooqtm1XhkqQo9ZRbv+K+Ujtj51aXHkBSinVqewoP/F8vF0kesDSpuJGRwulguTiEBw2kT",
-	"xJlGAJfu9pg33rJGmhL5gBRyE+7TRZsjx2jDiXGLTCpHvCxRMBll6AzmspAo+jr75uAe8FJEyNhD7mL7",
-	"uTtiuOUVEloXGmpIohdN7B3SbI3UcQGfRJ8ZThtIIOpvVJe+fmRrTNox5MMd13rlDzujlYvNfLJcxqmk",
-	"CFVIEDemlHmIJ/3hoq56PElYBcd/LRaQwT9pPwDTdvql7Qx5Ujxwa/kWgiCmoR+R+4BX8LqkPwriV9zj",
-	"2J6hWit8NJgTCobtmQRcXVXcbmeU1JPv6ujHkHYzIjwXgmnbDrRhqw6ldS7EVWd5XYq6q9HRhRbbF6tD",
-	"p6FpIaLFx8SF8I8u7RPazZFi/zt+7aLqbn5NIj2oNH9sfnSmu72F0ETxlkgze+xt+D5q1DYZhdXVfp2G",
-	"uo6eR0nb7xn/L2Bu372g2JM5Om2MR9AZ7txjpvnZoWXLYtnEa5Lj8xXTNE3zMwAA///r17r0bAsAAA==",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

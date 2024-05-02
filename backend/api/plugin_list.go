@@ -88,6 +88,18 @@ func (p *PluginList) DeletePlugin(w http.ResponseWriter, r *http.Request, server
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func (p *PluginList) GetServerNames(w http.ResponseWriter, r *http.Request) {
+	serverNames, err := p.useCase.GetServerNames(r.Context())
+	if err != nil {
+		sendError(w, http.StatusInternalServerError, "Internal server error")
+		slog.Error("Failed to the list of servers:", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(serverNames)
+}
+
 /* Helper methods to convert MCPlugin <-> Plugin */
 
 func toMCPlugin(plugin *Plugin) domain.MCPlugin {

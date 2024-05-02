@@ -63,6 +63,8 @@ const (
 	deleteMcPluginQuery = `DELETE FROM mc_plugins WHERE plugin_name = ? AND server_name = ?`
 
 	selectMCPluginsByServerName = "SELECT * FROM mc_plugins WHERE server_name=?"
+
+	selectServerNames = "SELECT DISTINCT server_name FROM mc_plugins"
 )
 
 func (c *sqliteConnection) NewMCPluginRepository() (repository.MCPluginRepository, error) {
@@ -135,6 +137,33 @@ func (m mcPluginRepository) GetMCPluginsByServerName(_ context.Context, serverNa
 		}
 		plugin.LastUpdated = time.UnixMilli(unixTime)
 		result = append(result, &plugin)
+	}
+
+	return result, nil
+}
+
+func (m mcPluginRepository) GetServerNames(ctx context.Context) (serverNames []string, returnErr error) {
+	rows, err := m.conn.db.Query(selectServerNames)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			returnErr = err
+		}
+	}(rows)
+
+	var result []string
+
+	for rows.Next() {
+		var serverName string
+		if err := rows.Scan(&serverName); err != nil {
+			return nil, err
+		}
+		result = append(result, serverName)
 	}
 
 	return result, nil

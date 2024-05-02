@@ -69,6 +69,21 @@ func (mr *MockMCPluginUseCaseMockRecorder) GetMCPluginsByServerName(ctx, serverN
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMCPluginsByServerName", reflect.TypeOf((*MockMCPluginUseCase)(nil).GetMCPluginsByServerName), ctx, serverName)
 }
 
+// GetServerNames mocks base method.
+func (m *MockMCPluginUseCase) GetServerNames(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetServerNames", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetServerNames indicates an expected call of GetServerNames.
+func (mr *MockMCPluginUseCaseMockRecorder) GetServerNames(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetServerNames", reflect.TypeOf((*MockMCPluginUseCase)(nil).GetServerNames), ctx)
+}
+
 // SubmitMCPlugin mocks base method.
 func (m *MockMCPluginUseCase) SubmitMCPlugin(ctx context.Context, plugin *domain.MCPlugin) error {
 	m.ctrl.T.Helper()

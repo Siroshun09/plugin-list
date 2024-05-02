@@ -12,4 +12,6 @@ type MCPluginRepository interface {
 	DeleteMCPlugin(ctx context.Context, serverName string, pluginName string) error
 	// GetMCPluginsByServerName はサーバー名を指定して、そのサーバーに導入されているプラグインの配列を取得します。
 	GetMCPluginsByServerName(ctx context.Context, serverName string) ([]*domain.MCPlugin, error)
+	// GetServerNames は記録されているプラグインのサーバー名をすべて取得します。
+	GetServerNames(ctx context.Context) ([]string, error)
 }

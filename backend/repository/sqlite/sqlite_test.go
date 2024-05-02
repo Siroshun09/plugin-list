@@ -69,6 +69,14 @@ func TestMcPluginRepository(t *testing.T) {
 	assertion.Nil(err)
 	checkTestPlugin(repo, &testPlugin, assertion)
 
+	// Get server names
+
+	serverNames, err := repo.GetServerNames(context.TODO())
+
+	assertion.Nil(err)
+	assertion.Equal(1, len(serverNames))
+	assertion.Equal(testPlugin.ServerName, serverNames[0])
+
 	// Delete `TestPlugin` data
 
 	err = repo.DeleteMCPlugin(context.TODO(), testPlugin.ServerName, testPlugin.PluginName)
@@ -79,6 +87,7 @@ func TestMcPluginRepository(t *testing.T) {
 
 	assertion.Nil(err)
 	assertion.Equal(0, len(plugins))
+
 }
 
 // checkTestPlugin はリポジトリから取得した MCPlugin と与えられた MCPlugin が等しいかどうかを確認するヘルパーメソッドです。

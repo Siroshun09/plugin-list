@@ -14,6 +14,8 @@ type MCPluginUseCase interface {
 	DeleteMCPlugin(ctx context.Context, serverName string, pluginName string) error
 	// SubmitMCPlugin はプラグイン情報を作成 (Create) または更新 (Update) します。
 	SubmitMCPlugin(ctx context.Context, plugin *domain.MCPlugin) error
+	// GetServerNames は記録されているプラグインのサーバー名をすべて取得します。
+	GetServerNames(ctx context.Context) ([]string, error)
 }
 
 func NewMCPluginUseCase(repo repository.MCPluginRepository) MCPluginUseCase {
@@ -34,4 +36,8 @@ func (r repositoryUseCase) DeleteMCPlugin(ctx context.Context, serverName string
 
 func (r repositoryUseCase) SubmitMCPlugin(ctx context.Context, plugin *domain.MCPlugin) error {
 	return r.repo.CreateOrUpdateMCPlugin(ctx, plugin)
+}
+
+func (r repositoryUseCase) GetServerNames(ctx context.Context) ([]string, error) {
+	return r.repo.GetServerNames(ctx)
 }

@@ -109,6 +109,32 @@ func TestRemovePlugin(t *testing.T) {
 	assertions.Equal(http.StatusNoContent, resp.StatusCode) // 通常、ステータスコードは 204 を返します
 }
 
+func TestGetServerNames(t *testing.T) {
+	assertions := assert.New(t)
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/servers", nil)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	m := mockUsecase.NewMockMCPluginUseCase(ctrl)
+	plList := NewPluginList(m)
+
+	serverNames := []string{"test_1", "test_2"}
+	m.EXPECT().GetServerNames(gomock.Any()).Return(serverNames, nil)
+
+	plList.GetServerNames(w, r)
+
+	resp := w.Result()
+
+	defer assertions.NoError(resp.Body.Close())
+	assertions.Equal(http.StatusOK, resp.StatusCode) // 通常、ステータスコード 200 を返します
+
+	var result []string
+	assertions.NoError(json.NewDecoder(resp.Body).Decode(&result))
+	assertions.Equal(serverNames, result)
+}
+
 func createTestMCPlugin() *domain.MCPlugin {
 	return &domain.MCPlugin{
 		PluginName:  "TestPlugin",
