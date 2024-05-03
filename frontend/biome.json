@@ -9,6 +9,11 @@
       "recommended": true
     }
   },
+  "files": {
+    "ignore": [
+      "./src/api/backend.ts"
+    ]
+  },
   "vcs": {
     "enabled": true,
     "clientKind": "git",
