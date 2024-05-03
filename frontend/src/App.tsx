@@ -28,6 +28,7 @@ function App() {
 			<p className="read-the-docs">
 				Click on the Vite and React logos to learn more
 			</p>
+			<p className="text-3xl font-bold underline">Hello Tailwind CSS!</p>
 		</>
 	);
 }
