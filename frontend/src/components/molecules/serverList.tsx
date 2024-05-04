@@ -1,4 +1,4 @@
-import ServerNameButton from "../atoms/ServerNameButton.tsx";
+import ServerNameButton from "../atoms/serverNameButton.tsx";
 
 export default function ServerList(props: {
 	list: string[];

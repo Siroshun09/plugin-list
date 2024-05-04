@@ -1,5 +1,5 @@
 import isNonEmptyArray from "../../utils/utils.ts";
-import ServerList from "../molecules/ServerList.tsx";
+import ServerList from "../molecules/serverList.tsx";
 
 export default function SideBar(props: {
 	serverList: string[];

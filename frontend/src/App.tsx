@@ -1,5 +1,5 @@
 import { useState } from "react";
-import SideBar from "./components/templates/SideBar.tsx";
+import SideBar from "./components/templates/sidebar.tsx";
 
 function App() {
 	const [server, setServerName] = useState("");
