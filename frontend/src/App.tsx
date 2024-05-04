@@ -1,15 +1,17 @@
 import { useState } from "react";
 import SideBar from "./components/templates/sidebar.tsx";
+import DemoPluginList from "./providers/demo/demoPluginList.ts";
 
 function App() {
 	const [server, setServerName] = useState("");
+	const provider = new DemoPluginList();
 
 	return (
 		<>
 			<div className="flex flex-wrap w-screen justify-center">
 				<div id="sidebar" className="w-1/4 bg-gray-50 h-screen">
 					<SideBar
-						serverList={["test-1", "test-2", "test-3"]}
+						provider={provider}
 						onServerSelected={(serverName) => setServerName(serverName)}
 					/>
 				</div>

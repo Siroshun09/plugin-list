@@ -1,14 +1,18 @@
+import type PluginListProvider from "../../providers/pluginListProvider.ts";
 import isNonEmptyArray from "../../utils/utils.ts";
 import ServerList from "../molecules/serverList.tsx";
 
 export default function SideBar(props: {
-	serverList: string[];
+	provider: PluginListProvider;
 	onServerSelected: (serverName: string) => void;
 }) {
 	return (
 		<div id="sidebar">
 			<h2 className="text-4xl m-5">Servers</h2>
-			{createServerListOrErrorIfEmpty(props.serverList, props.onServerSelected)}
+			{createServerListOrErrorIfEmpty(
+				props.provider.getServerList(),
+				props.onServerSelected,
+			)}
 		</div>
 	);
 }
