@@ -1,7 +1,7 @@
 import ServerNameButton from "../atoms/serverNameButton.tsx";
 
 export default function ServerList(props: {
-	list: string[];
+	list: readonly string[];
 	consumer: (serverName: string) => void;
 }) {
 	return (

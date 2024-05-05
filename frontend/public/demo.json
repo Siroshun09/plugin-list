@@ -1,0 +1,29 @@
+{
+  "hub": [
+  ],
+  "main": [
+    {
+      "plugin_name": "LuckPerms",
+      "file_name": "LuckPerms-Bukkit-5.4.126.jar",
+      "version": "5.4.126",
+      "type": "bukkit_plugin",
+      "last_updated": 1714426260
+    },
+    {
+      "plugin_name": "Box",
+      "file_name": "Box-5.4.3.jar",
+      "version": "5.4.3",
+      "type": "bukkit_plugin",
+      "last_updated": 1709510100
+    }
+  ],
+  "dev": [
+    {
+      "plugin_name": "Box",
+      "file_name": "Box-6.0.0-SNAPSHOT.jar",
+      "version": "6.0.0-SNAPSHOT-fde845f",
+      "type": "paper_plugin",
+      "last_updated": 1714790160
+    }
+  ]
+}
