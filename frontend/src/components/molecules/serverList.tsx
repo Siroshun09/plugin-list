@@ -6,14 +6,14 @@ export default function ServerList(props: {
 }) {
 	return (
 		<div id="server-list">
-			{props.list.map((serverName) => toHTML(serverName, props.consumer))}
+			{props.list.map((serverName) => createButton(serverName, props.consumer))}
 		</div>
 	);
 }
 
-function toHTML(serverName: string, consumer: (serverName: string) => void) {
+function createButton(serverName: string, consumer: (serverName: string) => void) {
 	return (
-		<div id={`server-list-${serverName}`}>
+		<div id={`server-${serverName}`} key={serverName}>
 			<ServerNameButton serverName={serverName} consumer={consumer} />
 		</div>
 	);
