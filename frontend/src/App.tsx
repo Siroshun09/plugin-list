@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import SideBar from "./components/templates/sidebar.tsx";
 import DemoPluginList from "./providers/demo/demoPluginList.ts";
 import PluginListProvider from "./providers/pluginListProvider.ts";
-import MCPlugin from "./providers/mcPlugin.ts";
+import PluginList from "./components/templates/pluginList.tsx";
 
 function App() {
 	const [server, setServerName] = useState("");
@@ -29,21 +29,11 @@ function App() {
 					/>
 				</div>
 				<div id="main" className="w-3/4">
-                    <p className="text-1xl">
-                        Selected Server: <span className="font-bold">{server}</span>
-                        <br/>
-                        Plugins: <br /><span className="font-bold">{render(provider.getPluginList(server))}</span>
-                    </p>
+                    <PluginList provider={provider} serverName={server} />
                 </div>
             </div>
         </>
     );
-}
-
-function render(plugins: readonly MCPlugin[] | undefined) {
-    return plugins === undefined ?
-        "" :
-        plugins.length == 0 ? "No plugins found." :  plugins.map(plugin => JSON.stringify(plugin)).join("\n")
 }
 
 export default App;

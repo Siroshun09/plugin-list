@@ -8,11 +8,12 @@
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
-    "check": "biome check ./src/",
-    "fix": "biome check --apply ./src/"
+		"check": "biome check ./src/",
+		"fix": "biome check --apply ./src/"
 	},
 	"dependencies": {
 		"@tanstack/react-query": "^5.32.1",
+		"@tanstack/react-table": "^8.16.0",
 		"axios": "^1.6.8",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
