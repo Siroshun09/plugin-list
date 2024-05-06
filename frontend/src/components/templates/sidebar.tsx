@@ -9,28 +9,29 @@ export default function SideBar(props: {
 	return (
 		<div id="sidebar">
 			<h2 className="text-4xl m-5">Servers</h2>
-			{createServerListOrErrorIfEmpty(
-				props.provider,
-				props.onServerSelected,
-			)}
+			{createServerListOrErrorIfEmpty(props.provider, props.onServerSelected)}
 		</div>
 	);
 }
 
 function createServerListOrErrorIfEmpty(
-    provider: PluginListProvider,
+	provider: PluginListProvider,
 	onServerSelected: (serverName: string) => void,
 ) {
-    if (PluginListProvider.isLoaded(provider)) {
-        const serverList = provider.getServerList()
-        if (isNonEmptyArray(serverList)) {
-            return createServerList(serverList, onServerSelected);
-        }
+	if (PluginListProvider.isLoaded(provider)) {
+		const serverList = provider.getServerList();
+		if (isNonEmptyArray(serverList)) {
+			return createServerList(serverList, onServerSelected);
+		}
 
-        return <p className="text-2xl my-3 mx-5 text-red-500">No servers found</p>;
-    }
+		return <p className="text-2xl my-3 mx-5 text-red-500">No servers found</p>;
+	}
 
-    return <p className="text-xs my-3 mx-5 text-gray-700">Currently loading. Please wait a moment...</p>;
+	return (
+		<p className="text-xs my-3 mx-5 text-gray-700">
+			Currently loading. Please wait a moment...
+		</p>
+	);
 }
 
 function createServerList(

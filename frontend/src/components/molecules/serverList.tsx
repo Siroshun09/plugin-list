@@ -11,7 +11,10 @@ export default function ServerList(props: {
 	);
 }
 
-function createButton(serverName: string, consumer: (serverName: string) => void) {
+function createButton(
+	serverName: string,
+	consumer: (serverName: string) => void,
+) {
 	return (
 		<div id={`server-${serverName}`} key={serverName}>
 			<ServerNameButton serverName={serverName} consumer={consumer} />

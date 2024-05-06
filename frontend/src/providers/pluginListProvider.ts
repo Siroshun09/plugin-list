@@ -1,26 +1,25 @@
-import MCPlugin from "./mcPlugin.ts";
+import type MCPlugin from "./mcPlugin.ts";
 
 export default abstract class PluginListProvider {
+	public static createLoading(): PluginListProvider {
+		return new LoadingPluginListProvider();
+	}
 
-    public static createLoading(): PluginListProvider {
-        return new LoadingPluginListProvider()
-    }
+	public static isLoaded(provider: PluginListProvider): boolean {
+		return !(provider instanceof LoadingPluginListProvider);
+	}
 
-    public static isLoaded(provider: PluginListProvider): boolean {
-        return !(provider instanceof LoadingPluginListProvider)
-    }
+	abstract getServerList(): readonly string[];
 
-    abstract getServerList(): readonly string[];
-
-    abstract getPluginList(server: string): readonly MCPlugin[] | undefined
+	abstract getPluginList(server: string): readonly MCPlugin[] | undefined;
 }
 
 class LoadingPluginListProvider implements PluginListProvider {
-    getServerList(): readonly string[] {
-        return [];
-    }
+	getServerList(): readonly string[] {
+		return [];
+	}
 
-    getPluginList(_server: string): readonly MCPlugin[] | undefined {
-        return undefined;
-    }
+	getPluginList(_server: string): readonly MCPlugin[] | undefined {
+		return undefined;
+	}
 }

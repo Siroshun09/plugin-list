@@ -1,10 +1,10 @@
 type MCPlugin = {
-    pluginName: string,
-    serverName: string,
-    fileName: string,
-    version: string,
-    type: string,
-    lastUpdated: Date
-}
+	pluginName: string;
+	serverName: string;
+	fileName: string;
+	version: string;
+	type: string;
+	lastUpdated: Date;
+};
 
-export default MCPlugin
+export default MCPlugin;
