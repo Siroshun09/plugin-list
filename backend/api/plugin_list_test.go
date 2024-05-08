@@ -28,7 +28,7 @@ func TestConvertMCPluginAndPlugin(t *testing.T) {
 func TestGetPluginsByServer(t *testing.T) {
 	assertions := assert.New(t)
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/plugins/test", nil) // /plugins/test にリクエストが来たと想定します
+	r := httptest.NewRequest("GET", "/servers/test/plugins", nil) // /servers/test/plugins にリクエストが来たと想定します
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -64,7 +64,7 @@ func TestAddPlugin(t *testing.T) {
 	assertions.NoError(err)
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/plugins/test", bytes.NewBuffer(body)) // /plugins/test にリクエストが来たと想定します
+	r := httptest.NewRequest("GET", "/servers/test/plugins", bytes.NewBuffer(body)) // /servers/test/plugins にリクエストが来たと想定します
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -92,7 +92,7 @@ func TestAddPlugin(t *testing.T) {
 func TestRemovePlugin(t *testing.T) {
 	assertions := assert.New(t)
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/plugins/test/TestPlugin", nil) // /plugins/test/TestPlugin にリクエストが来たと想定します
+	r := httptest.NewRequest("GET", "/servers/test/plugins/TestPlugin", nil) // /servers/test/plugins/TestPlugin にリクエストが来たと想定します
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -112,7 +112,7 @@ func TestRemovePlugin(t *testing.T) {
 func TestGetServerNames(t *testing.T) {
 	assertions := assert.New(t)
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/servers", nil)
+	r := httptest.NewRequest("GET", "/servers", nil) // /servers にリクエストが来たと想定します
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

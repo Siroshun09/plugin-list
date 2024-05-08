@@ -58,45 +58,45 @@ type AddPluginJSONRequestBody = Plugin
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Get the list of installed plugins
-	// (GET /plugins/{server_name})
-	GetPluginsByServer(w http.ResponseWriter, r *http.Request, serverName string)
-	// Add or update the plugin
-	// (POST /plugins/{server_name})
-	AddPlugin(w http.ResponseWriter, r *http.Request, serverName string)
-	// Delete the specified plugin from the list
-	// (DELETE /plugins/{server_name}/{plugin_name})
-	DeletePlugin(w http.ResponseWriter, r *http.Request, serverName string, pluginName string)
 	// Get the list of servers
 	// (GET /servers/)
 	GetServerNames(w http.ResponseWriter, r *http.Request)
+	// Get the list of installed plugins
+	// (GET /servers/{server_name}/plugins)
+	GetPluginsByServer(w http.ResponseWriter, r *http.Request, serverName string)
+	// Add or update the plugin
+	// (POST /servers/{server_name}/plugins)
+	AddPlugin(w http.ResponseWriter, r *http.Request, serverName string)
+	// Delete the specified plugin from the list
+	// (DELETE /servers/{server_name}/plugins/{plugin_name})
+	DeletePlugin(w http.ResponseWriter, r *http.Request, serverName string, pluginName string)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
 
+// Get the list of servers
+// (GET /servers/)
+func (_ Unimplemented) GetServerNames(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Get the list of installed plugins
-// (GET /plugins/{server_name})
+// (GET /servers/{server_name}/plugins)
 func (_ Unimplemented) GetPluginsByServer(w http.ResponseWriter, r *http.Request, serverName string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Add or update the plugin
-// (POST /plugins/{server_name})
+// (POST /servers/{server_name}/plugins)
 func (_ Unimplemented) AddPlugin(w http.ResponseWriter, r *http.Request, serverName string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Delete the specified plugin from the list
-// (DELETE /plugins/{server_name}/{plugin_name})
+// (DELETE /servers/{server_name}/plugins/{plugin_name})
 func (_ Unimplemented) DeletePlugin(w http.ResponseWriter, r *http.Request, serverName string, pluginName string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Get the list of servers
-// (GET /servers/)
-func (_ Unimplemented) GetServerNames(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -108,6 +108,21 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// GetServerNames operation middleware
+func (siw *ServerInterfaceWrapper) GetServerNames(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetServerNames(w, r)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
 
 // GetPluginsByServer operation middleware
 func (siw *ServerInterfaceWrapper) GetPluginsByServer(w http.ResponseWriter, r *http.Request) {
@@ -191,21 +206,6 @@ func (siw *ServerInterfaceWrapper) DeletePlugin(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeletePlugin(w, r, serverName, pluginName)
-	}))
-
-	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
-		handler = siw.HandlerMiddlewares[i](handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// GetServerNames operation middleware
-func (siw *ServerInterfaceWrapper) GetServerNames(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetServerNames(w, r)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -329,16 +329,16 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/plugins/{server_name}", wrapper.GetPluginsByServer)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/plugins/{server_name}", wrapper.AddPlugin)
-	})
-	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/plugins/{server_name}/{plugin_name}", wrapper.DeletePlugin)
-	})
-	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/servers/", wrapper.GetServerNames)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/servers/{server_name}/plugins", wrapper.GetPluginsByServer)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/servers/{server_name}/plugins", wrapper.AddPlugin)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/servers/{server_name}/plugins/{plugin_name}", wrapper.DeletePlugin)
 	})
 
 	return r
@@ -347,21 +347,21 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
