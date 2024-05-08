@@ -19,11 +19,7 @@ function createSelectedPluginList(
 	serverName: string,
 ) {
 	if (serverName.length === 0) {
-		return (
-			<p className="text-2xl">
-				⇐ Select the server from the sidebar to show plugin list.
-			</p>
-		);
+		return <p className="text-2xl">⇐ Select the server from the sidebar.</p>;
 	}
 
 	const plugins = provider.getPluginList(serverName);

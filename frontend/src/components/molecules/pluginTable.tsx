@@ -1,9 +1,13 @@
 import {
+	type HeaderContext,
+	type SortDirection,
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
+	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import type MCPlugin from "../../providers/mcPlugin.ts";
 import isNonEmptyArray from "../../utils/utils.ts";
 import PluginCount from "../atoms/pluginCount.tsx";
@@ -37,6 +41,10 @@ function createTable(plugins: [MCPlugin, ...MCPlugin[]]) {
 		data: plugins,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		initialState: {
+			sorting: [{ id: "pluginName", desc: false }],
+		},
 	});
 
 	return (
@@ -75,7 +83,7 @@ function createTable(plugins: [MCPlugin, ...MCPlugin[]]) {
 const columnHelper = createColumnHelper<MCPlugin>();
 const columns = [
 	columnHelper.accessor("pluginName", {
-		header: "Name",
+		header: (ctx) => makeSortableColumn(ctx, "Name"),
 		cell: (info) => info.getValue(),
 	}),
 	columnHelper.accessor("fileName", {
@@ -87,10 +95,31 @@ const columns = [
 		cell: (info) => info.getValue(),
 	}),
 	columnHelper.accessor("lastUpdated", {
-		header: "LastUpdated",
+		header: (ctx) => makeSortableColumn(ctx, "Last Updated"),
 		cell: (info) =>
-			`${info.getValue().toLocaleDateString()} ${info
-				.getValue()
-				.toLocaleTimeString()}`,
+			`${info.getValue().toLocaleDateString()}
+			${info.getValue().toLocaleTimeString()}`,
 	}),
 ];
+
+function makeSortableColumn<I, O>(ctx: HeaderContext<I, O>, name: string) {
+	return (
+		<div className="items-center justify-center">
+			<span className="mr-1">{name}</span>
+			<button onClick={ctx.column.getToggleSortingHandler()} type="button">
+				{getSortIcon(ctx.column.getIsSorted())}
+			</button>
+		</div>
+	);
+}
+
+function getSortIcon(sort: false | SortDirection) {
+	switch (sort) {
+		case "asc":
+			return <FaSortUp />;
+		case "desc":
+			return <FaSortDown />;
+		default:
+			return <FaSort />;
+	}
+}
