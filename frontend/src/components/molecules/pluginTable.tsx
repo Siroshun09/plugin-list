@@ -4,6 +4,7 @@ import {
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
+	getFilteredRowModel,
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
@@ -42,41 +43,59 @@ function createTable(plugins: [MCPlugin, ...MCPlugin[]]) {
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
 		initialState: {
 			sorting: [{ id: "pluginName", desc: false }],
 		},
 	});
 
 	return (
-		<table className="table-auto w-full">
-			<thead>
-				{table.getHeaderGroups().map((headerGroup) => (
-					<tr key={headerGroup.id} className="text-center bg-gray-100">
-						{headerGroup.headers.map((header) => (
-							<th key={header.id} className="px-4 py-2 border border-gray-300">
-								{header.isPlaceholder
-									? null
-									: flexRender(
-											header.column.columnDef.header,
-											header.getContext(),
-										)}
-							</th>
-						))}
-					</tr>
-				))}
-			</thead>
-			<tbody>
-				{table.getRowModel().rows.map((row) => (
-					<tr key={row.id}>
-						{row.getVisibleCells().map((cell) => (
-							<td key={cell.id} className="px-4 py-2 border border-gray-300">
-								{flexRender(cell.column.columnDef.cell, cell.getContext())}
-							</td>
-						))}
-					</tr>
-				))}
-			</tbody>
-		</table>
+		<>
+			<div id="name-filter">
+				<input
+					placeholder="Filter plugins by name..."
+					value={
+						(table.getColumn("pluginName")?.getFilterValue() as string) ?? ""
+					}
+					onChange={(e) => {
+						table.getColumn("pluginName")?.setFilterValue(e.target.value);
+					}}
+					className="flex flex-row-reverse bg-white border border-gray-400 px-1 my-1.5 right-0"
+				/>
+			</div>
+			<table className="table-auto w-full">
+				<thead>
+					{table.getHeaderGroups().map((headerGroup) => (
+						<tr key={headerGroup.id} className="text-center bg-gray-100">
+							{headerGroup.headers.map((header) => (
+								<th
+									key={header.id}
+									className="px-4 py-2 border border-gray-300"
+								>
+									{header.isPlaceholder
+										? null
+										: flexRender(
+												header.column.columnDef.header,
+												header.getContext(),
+											)}
+								</th>
+							))}
+						</tr>
+					))}
+				</thead>
+				<tbody>
+					{table.getRowModel().rows.map((row) => (
+						<tr key={row.id}>
+							{row.getVisibleCells().map((cell) => (
+								<td key={cell.id} className="px-4 py-2 border border-gray-300">
+									{flexRender(cell.column.columnDef.cell, cell.getContext())}
+								</td>
+							))}
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</>
 	);
 }
 
@@ -85,6 +104,17 @@ const columns = [
 	columnHelper.accessor("pluginName", {
 		header: (ctx) => makeSortableColumn(ctx, "Name"),
 		cell: (info) => info.getValue(),
+		filterFn: (row, columnId, value) => {
+			const filters = ((value as string) ?? "")
+				.split(" ")
+				.filter((str) => str.length > 0) // Remove empty filter values
+				.map((str) => str.toLowerCase()); // Make filter values lowercase to eliminate case sensitivity.
+			const cell = row.getValue<string>(columnId).toLowerCase(); // Similarly, lowercase the cell values
+			return (
+				filters.length === 0 ||
+				filters.find((filter) => cell.indexOf(filter) !== -1) !== undefined
+			);
+		},
 	}),
 	columnHelper.accessor("fileName", {
 		header: "File",
