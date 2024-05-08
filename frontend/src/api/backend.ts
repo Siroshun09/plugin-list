@@ -24,6 +24,11 @@ import type {
   AxiosRequestConfig,
   AxiosResponse
 } from 'axios'
+/**
+ * Access token is missing or invalid
+ */
+export type UnauthorizedErrorResponse = void;
+
 export interface Error {
   /** Error code */
   code: number;
@@ -53,6 +58,66 @@ export type Plugin = PluginAllOf;
 
 
 /**
+ * Get the list of servers
+ * @summary Get the list of servers
+ */
+export const getServerNames = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<string[]>> => {
+    
+    return axios.get(
+      `/servers/`,options
+    );
+  }
+
+
+export const getGetServerNamesQueryKey = () => {
+    return [`/servers/`] as const;
+    }
+
+    
+export const getGetServerNamesQueryOptions = <TData = Awaited<ReturnType<typeof getServerNames>>, TError = AxiosError<Error>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServerNames>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetServerNamesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getServerNames>>> = ({ signal }) => getServerNames({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getServerNames>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetServerNamesQueryResult = NonNullable<Awaited<ReturnType<typeof getServerNames>>>
+export type GetServerNamesQueryError = AxiosError<Error>
+
+/**
+ * @summary Get the list of servers
+ */
+export const useGetServerNames = <TData = Awaited<ReturnType<typeof getServerNames>>, TError = AxiosError<Error>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServerNames>>, TError, TData>>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const queryOptions = getGetServerNamesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
  * Get the list of plugins that are installed in the specified server
  * @summary Get the list of installed plugins
  */
@@ -61,17 +126,17 @@ export const getPluginsByServer = (
  ): Promise<AxiosResponse<Plugin[]>> => {
     
     return axios.get(
-      `/plugins/${serverName}`,options
+      `/servers/${serverName}/plugins`,options
     );
   }
 
 
 export const getGetPluginsByServerQueryKey = (serverName: string,) => {
-    return [`/plugins/${serverName}`] as const;
+    return [`/servers/${serverName}/plugins`] as const;
     }
 
     
-export const getGetPluginsByServerQueryOptions = <TData = Awaited<ReturnType<typeof getPluginsByServer>>, TError = AxiosError<Error>>(serverName: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPluginsByServer>>, TError, TData>, axios?: AxiosRequestConfig}
+export const getGetPluginsByServerQueryOptions = <TData = Awaited<ReturnType<typeof getPluginsByServer>>, TError = AxiosError<Error>>(serverName: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPluginsByServer>>, TError, TData>>, axios?: AxiosRequestConfig}
 ) => {
 
 const {query: queryOptions, axios: axiosOptions} = options ?? {};
@@ -96,7 +161,7 @@ export type GetPluginsByServerQueryError = AxiosError<Error>
  * @summary Get the list of installed plugins
  */
 export const useGetPluginsByServer = <TData = Awaited<ReturnType<typeof getPluginsByServer>>, TError = AxiosError<Error>>(
- serverName: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPluginsByServer>>, TError, TData>, axios?: AxiosRequestConfig}
+ serverName: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPluginsByServer>>, TError, TData>>, axios?: AxiosRequestConfig}
 
   ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 
@@ -122,14 +187,14 @@ export const addPlugin = (
  ): Promise<AxiosResponse<Plugin>> => {
     
     return axios.post(
-      `/plugins/${serverName}`,
+      `/servers/${serverName}/plugins`,
       plugin,options
     );
   }
 
 
 
-export const getAddPluginMutationOptions = <TError = AxiosError<Error>,
+export const getAddPluginMutationOptions = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;data: Plugin}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;data: Plugin}, TContext> => {
 const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
@@ -150,12 +215,12 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
 
     export type AddPluginMutationResult = NonNullable<Awaited<ReturnType<typeof addPlugin>>>
     export type AddPluginMutationBody = Plugin
-    export type AddPluginMutationError = AxiosError<Error>
+    export type AddPluginMutationError = AxiosError<UnauthorizedErrorResponse | Error>
 
     /**
  * @summary Add or update the plugin
  */
-export const useAddPlugin = <TError = AxiosError<Error>,
+export const useAddPlugin = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;data: Plugin}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationResult<
         Awaited<ReturnType<typeof addPlugin>>,
@@ -179,13 +244,13 @@ export const deletePlugin = (
  ): Promise<AxiosResponse<void>> => {
     
     return axios.delete(
-      `/plugins/${serverName}/${pluginName}`,options
+      `/servers/${serverName}/plugins/${pluginName}`,options
     );
   }
 
 
 
-export const getDeletePluginMutationOptions = <TError = AxiosError<Error>,
+export const getDeletePluginMutationOptions = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlugin>>, TError,{serverName: string;pluginName: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof deletePlugin>>, TError,{serverName: string;pluginName: string}, TContext> => {
 const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
@@ -206,12 +271,12 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
 
     export type DeletePluginMutationResult = NonNullable<Awaited<ReturnType<typeof deletePlugin>>>
     
-    export type DeletePluginMutationError = AxiosError<Error>
+    export type DeletePluginMutationError = AxiosError<UnauthorizedErrorResponse | Error>
 
     /**
  * @summary Delete the specified plugin from the list
  */
-export const useDeletePlugin = <TError = AxiosError<Error>,
+export const useDeletePlugin = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlugin>>, TError,{serverName: string;pluginName: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationResult<
         Awaited<ReturnType<typeof deletePlugin>>,
@@ -225,63 +290,3 @@ export const useDeletePlugin = <TError = AxiosError<Error>,
       return useMutation(mutationOptions);
     }
     
-/**
- * Get the list of servers
- * @summary Get the list of servers
- */
-export const getServerNames = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<string[]>> => {
-    
-    return axios.get(
-      `/servers/`,options
-    );
-  }
-
-
-export const getGetServerNamesQueryKey = () => {
-    return [`/servers/`] as const;
-    }
-
-    
-export const getGetServerNamesQueryOptions = <TData = Awaited<ReturnType<typeof getServerNames>>, TError = AxiosError<Error>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getServerNames>>, TError, TData>, axios?: AxiosRequestConfig}
-) => {
-
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetServerNamesQueryKey();
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getServerNames>>> = ({ signal }) => getServerNames({ signal, ...axiosOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getServerNames>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetServerNamesQueryResult = NonNullable<Awaited<ReturnType<typeof getServerNames>>>
-export type GetServerNamesQueryError = AxiosError<Error>
-
-/**
- * @summary Get the list of servers
- */
-export const useGetServerNames = <TData = Awaited<ReturnType<typeof getServerNames>>, TError = AxiosError<Error>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getServerNames>>, TError, TData>, axios?: AxiosRequestConfig}
-
-  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-
-  const queryOptions = getGetServerNamesQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
-}
-
-
-
-
