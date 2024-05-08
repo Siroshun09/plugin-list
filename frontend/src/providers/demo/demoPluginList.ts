@@ -1,8 +1,8 @@
 import axios from "axios";
 import type MCPlugin from "../mcPlugin.ts";
-import type PluginListProvider from "../pluginListProvider.ts";
+import PluginListProvider from "../pluginListProvider.ts";
 
-export default class DemoPluginList implements PluginListProvider {
+export default class DemoPluginList extends PluginListProvider {
 	public static async create(): Promise<DemoPluginList> {
 		return new DemoPluginList(await fetchDemoPluginLists());
 	}
@@ -10,6 +10,7 @@ export default class DemoPluginList implements PluginListProvider {
 	private pluginListByServer;
 
 	constructor(map: Map<string, readonly MCPlugin[]>) {
+		super();
 		this.pluginListByServer = map;
 	}
 

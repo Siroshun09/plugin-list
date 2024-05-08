@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import type MCPlugin from "./mcPlugin.ts";
 
 export default abstract class PluginListProvider {
@@ -12,9 +13,13 @@ export default abstract class PluginListProvider {
 	abstract getServerList(): readonly string[];
 
 	abstract getPluginList(server: string): readonly MCPlugin[] | undefined;
+
+	injectQueryClient(element: JSX.Element): JSX.Element {
+		return element;
+	}
 }
 
-class LoadingPluginListProvider implements PluginListProvider {
+class LoadingPluginListProvider extends PluginListProvider {
 	getServerList(): readonly string[] {
 		return [];
 	}
