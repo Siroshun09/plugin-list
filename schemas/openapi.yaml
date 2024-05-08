@@ -5,7 +5,28 @@ info:
   version: 1.0.0
 
 paths:
-  /plugins/{server_name}:
+  /servers/:
+    get:
+      summary: Get the list of servers
+      description: Get the list of servers
+      operationId: getServerNames
+      responses:
+        '200':
+          description: the list of servers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["test_1", "test_2"]
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /servers/{server_name}/plugins:
     get:
       summary: Get the list of installed plugins
       description: Get the list of plugins that are installed in the specified server
@@ -67,7 +88,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /plugins/{server_name}/{plugin_name}:
+  /servers/{server_name}/plugins/{plugin_name}:
     delete:
       summary: Delete the specified plugin from the list
       description: Delete the specified plugin from the list
@@ -92,27 +113,6 @@ paths:
           description: plugin deleted
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /servers/:
-    get:
-      summary: Get the list of servers
-      description: Get the list of servers
-      operationId: getServerNames
-      responses:
-        '200':
-          description: the list of servers
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-                example: ["test_1", "test_2"]
         default:
           description: unexpected error
           content:
