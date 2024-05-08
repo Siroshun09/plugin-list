@@ -36,6 +36,8 @@ paths:
       summary: Add or update the plugin
       description: Add or update the plugin
       operationId: addPlugin
+      security:
+        - Token: [ ]
       parameters:
         - name: server_name
           in: path
@@ -57,6 +59,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Plugin'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -68,6 +72,8 @@ paths:
       summary: Delete the specified plugin from the list
       description: Delete the specified plugin from the list
       operationId: deletePlugin
+      security:
+        - Token: [ ]
       parameters:
         - name: server_name
           in: path
@@ -84,6 +90,8 @@ paths:
       responses:
         '204':
           description: plugin deleted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -155,3 +163,12 @@ components:
         message:
           type: string
           description: Error message
+  securitySchemes:
+    Token:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      description: A token to create/edit/delete plugins via API
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid

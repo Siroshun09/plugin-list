@@ -18,6 +18,7 @@ type Connection interface {
 	IsOpen() bool
 	Close() error
 	NewMCPluginRepository() (repository.MCPluginRepository, error)
+	NewTokenRepository() (repository.TokenRepository, error)
 }
 
 type sqliteConnection struct {

@@ -6,6 +6,7 @@ package api
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -16,6 +17,10 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
+)
+
+const (
+	TokenScopes = "Token.Scopes"
 )
 
 // Error defines model for Error.
@@ -145,6 +150,8 @@ func (siw *ServerInterfaceWrapper) AddPlugin(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	ctx = context.WithValue(ctx, TokenScopes, []string{})
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.AddPlugin(w, r, serverName)
 	}))
@@ -179,6 +186,8 @@ func (siw *ServerInterfaceWrapper) DeletePlugin(w http.ResponseWriter, r *http.R
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "plugin_name", Err: err})
 		return
 	}
+
+	ctx = context.WithValue(ctx, TokenScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeletePlugin(w, r, serverName, pluginName)
@@ -338,19 +347,21 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

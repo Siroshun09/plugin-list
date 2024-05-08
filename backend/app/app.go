@@ -2,9 +2,11 @@ package app
 
 import (
 	"context"
+	"errors"
 	"github.com/Siroshun09/plugin-list/api"
 	"github.com/Siroshun09/plugin-list/repository/sqlite"
 	"github.com/Siroshun09/plugin-list/usecase"
+	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/chi/v5"
 	middleware "github.com/oapi-codegen/nethttp-middleware"
 	"log"
@@ -18,8 +20,13 @@ import (
 
 type App struct {
 	McPluginUseCase usecase.MCPluginUseCase
+	TokenUseCase    usecase.TokenUseCase
 	Server          *http.Server
 }
+
+var (
+	errInvalidSecuritySchema = errors.New("invalid Security Schema")
+)
 
 func NewApp(conn sqlite.Connection) (*App, error) {
 	slog.Info("Initializing the repository for MCPlugins...")
@@ -30,9 +37,17 @@ func NewApp(conn sqlite.Connection) (*App, error) {
 		os.Exit(1)
 	}
 
-	mcPluginUseCase := usecase.NewMCPluginUseCase(mcPluginRepo)
+	tokenRepo, err := conn.NewTokenRepository()
 
-	return &App{mcPluginUseCase, nil}, nil
+	if err != nil {
+		slog.Error("Failed to initialize the repository for tokens", err)
+		os.Exit(1)
+	}
+
+	mcPluginUseCase := usecase.NewMCPluginUseCase(mcPluginRepo)
+	tokenUseCase := usecase.NewTokenUseCase(tokenRepo)
+
+	return &App{mcPluginUseCase, tokenUseCase, nil}, nil
 }
 
 func (app *App) PrepareServer(port string) error {
@@ -50,12 +65,23 @@ func (app *App) PrepareServer(port string) error {
 	// Create an instance of our handler which satisfies the generated interface
 	pluginList := api.NewPluginList(app.McPluginUseCase)
 
+	validatorOpts := &middleware.Options{}
+
+	validatorOpts.Options.AuthenticationFunc = func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+		switch input.SecuritySchemeName {
+		case "Token":
+			return api.ValidateToken(app.TokenUseCase, ctx, input)
+		default:
+			return errInvalidSecuritySchema
+		}
+	}
+
 	// This is how you set up a basic chi router
 	r := chi.NewRouter()
 
 	// Use our validation middleware to check all requests against the
 	// OpenAPI schema.
-	r.Use(middleware.OapiRequestValidator(swagger))
+	r.Use(middleware.OapiRequestValidatorWithOptions(swagger, validatorOpts))
 
 	// We now register our plugin-list above as the handler for the interface
 	api.HandlerFromMux(pluginList, r)
