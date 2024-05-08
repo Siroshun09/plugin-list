@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"github.com/Siroshun09/plugin-list/app"
+	"github.com/Siroshun09/plugin-list/handler"
 	"github.com/Siroshun09/plugin-list/repository/sqlite"
-	"log"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -47,8 +50,31 @@ func main() {
 		return
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		quit, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt, os.Kill)
+		defer stop()
+
+		<-quit.Done()
+		cancel()
+	}()
+
+	go func() {
+		err := a.HandleShutdown(ctx)
+		if err != nil {
+			slog.Error("Failed to shutdown the web server", err)
+			os.Exit(1)
+		}
+	}()
+
+	go a.Start()
+
 	slog.Info("The server has started!")
-	if err = a.Start(); err != nil {
-		log.Fatalf("%s", err.Error())
-	}
+
+	go handler.HandleConsoleInput(a.TokenUseCase, cancel)
+
+	<-ctx.Done()
+	slog.Info("Stopping plugin-list...")
 }

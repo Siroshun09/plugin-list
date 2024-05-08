@@ -14,7 +14,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/signal"
 	"time"
 )
 
@@ -94,20 +93,17 @@ func (app *App) PrepareServer(port string) error {
 	return nil
 }
 
-func (app *App) Start() error {
-	go func() {
-		if err := app.Server.ListenAndServe(); err != nil {
-			log.Fatalf("Failed to listen and serve: %+v", err)
-		}
-	}()
+func (app *App) Start() {
+	if err := app.Server.ListenAndServe(); err != nil {
+		log.Fatalf("Failed to listen and serve: %+v", err)
+	}
+}
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, os.Interrupt)
-
-	<-quit
-
-	ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
-	defer shutdown()
+func (app *App) HandleShutdown(ctx context.Context) error {
+	<-ctx.Done()
+	slog.Info("Stopping the web server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	return app.Server.Shutdown(ctx)
 }
