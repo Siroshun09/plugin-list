@@ -54,6 +54,58 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
+      summary: Add or update the plugins
+      description: Add or update the plugins
+      operationId: addPlugins
+      security:
+        - Token: [ ]
+      parameters:
+        - name: server_name
+          in: path
+          description: the server name to get plugins
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Plugins to add to the list
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  plugin_name:
+                    type: string
+                    description: Name of the plugin
+                  file_name:
+                    type: string
+                    description: File name of the plugin
+                  version:
+                    type: string
+                    description: Version of the plugin
+                  type:
+                    type: string
+                    description: Type of the plugin
+                    example: "bukkit_plugin"
+                  last_updated:
+                    type: integer
+                    format: int64
+                    description: Unix time when the plugin was last updated
+      responses:
+        '201':
+          description: success
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /servers/{server_name}/plugins/{plugin_name}:
+    post:
       summary: Add or update the plugin
       description: Add or update the plugin
       operationId: addPlugin
@@ -66,20 +118,37 @@ paths:
           required: true
           schema:
             type: string
+        - name: plugin_name
+          in: path
+          description: the plugin name to get information of the plugin
+          required: true
+          schema:
+            type: string
       requestBody:
-        description: Plugin to add to the list
+        description: A new plugin data
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Plugin'
+              type: object
+              properties:
+                file_name:
+                  type: string
+                  description: File name of the plugin
+                version:
+                  type: string
+                  description: Version of the plugin
+                type:
+                  type: string
+                  description: Type of the plugin
+                  example: "bukkit_plugin"
+                last_updated:
+                  type: integer
+                  format: int64
+                  description: Unix time when the plugin was last updated
       responses:
-        '200':
-          description: plugin response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Plugin'
+        '201':
+          description: success
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         default:
@@ -88,7 +157,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /servers/{server_name}/plugins/{plugin_name}:
     delete:
       summary: Delete the specified plugin from the list
       description: Delete the specified plugin from the list
