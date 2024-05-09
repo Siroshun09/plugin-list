@@ -11,19 +11,8 @@ import PluginListProvider from "../pluginListProvider.ts";
 
 export default class APIPluginList extends PluginListProvider {
 	public static create(apiUrl: string): APIPluginList {
-		const client = new QueryClient({
-			defaultOptions: {
-				queries: {
-					queryFn: async ({ queryKey: [url] }) => {
-						if (typeof url === "string") {
-							const { data } = await axios.get(`${apiUrl}/${url}`);
-							return data;
-						}
-						throw new Error("Invalid QueryKey");
-					},
-				},
-			},
-		});
+		const client = new QueryClient();
+		axios.defaults.baseURL = apiUrl
 		return new APIPluginList(client);
 	}
 
