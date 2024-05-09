@@ -24,6 +24,30 @@ import type {
   AxiosRequestConfig,
   AxiosResponse
 } from 'axios'
+export type AddPluginBody = {
+  /** File name of the plugin */
+  file_name?: string;
+  /** Unix time when the plugin was last updated */
+  last_updated?: number;
+  /** Type of the plugin */
+  type?: string;
+  /** Version of the plugin */
+  version?: string;
+};
+
+export type AddPluginsBodyItem = {
+  /** File name of the plugin */
+  file_name?: string;
+  /** Unix time when the plugin was last updated */
+  last_updated?: number;
+  /** Name of the plugin */
+  plugin_name?: string;
+  /** Type of the plugin */
+  type?: string;
+  /** Version of the plugin */
+  version?: string;
+};
+
 /**
  * Access token is missing or invalid
  */
@@ -178,34 +202,92 @@ export const useGetPluginsByServer = <TData = Awaited<ReturnType<typeof getPlugi
 
 
 /**
+ * Add or update the plugins
+ * @summary Add or update the plugins
+ */
+export const addPlugins = (
+    serverName: string,
+    addPluginsBodyItem: AddPluginsBodyItem[], options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    return axios.post(
+      `/servers/${serverName}/plugins`,
+      addPluginsBodyItem,options
+    );
+  }
+
+
+
+export const getAddPluginsMutationOptions = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugins>>, TError,{serverName: string;data: AddPluginsBodyItem[]}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof addPlugins>>, TError,{serverName: string;data: AddPluginsBodyItem[]}, TContext> => {
+const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addPlugins>>, {serverName: string;data: AddPluginsBodyItem[]}> = (props) => {
+          const {serverName,data} = props ?? {};
+
+          return  addPlugins(serverName,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddPluginsMutationResult = NonNullable<Awaited<ReturnType<typeof addPlugins>>>
+    export type AddPluginsMutationBody = AddPluginsBodyItem[]
+    export type AddPluginsMutationError = AxiosError<UnauthorizedErrorResponse | Error>
+
+    /**
+ * @summary Add or update the plugins
+ */
+export const useAddPlugins = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugins>>, TError,{serverName: string;data: AddPluginsBodyItem[]}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationResult<
+        Awaited<ReturnType<typeof addPlugins>>,
+        TError,
+        {serverName: string;data: AddPluginsBodyItem[]},
+        TContext
+      > => {
+
+      const mutationOptions = getAddPluginsMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    
+/**
  * Add or update the plugin
  * @summary Add or update the plugin
  */
 export const addPlugin = (
     serverName: string,
-    plugin: Plugin, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<Plugin>> => {
+    pluginName: string,
+    addPluginBody: AddPluginBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
     
     return axios.post(
-      `/servers/${serverName}/plugins`,
-      plugin,options
+      `/servers/${serverName}/plugins/${pluginName}`,
+      addPluginBody,options
     );
   }
 
 
 
 export const getAddPluginMutationOptions = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;data: Plugin}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;data: Plugin}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;pluginName: string;data: AddPluginBody}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;pluginName: string;data: AddPluginBody}, TContext> => {
 const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
 
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addPlugin>>, {serverName: string;data: Plugin}> = (props) => {
-          const {serverName,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addPlugin>>, {serverName: string;pluginName: string;data: AddPluginBody}> = (props) => {
+          const {serverName,pluginName,data} = props ?? {};
 
-          return  addPlugin(serverName,data,axiosOptions)
+          return  addPlugin(serverName,pluginName,data,axiosOptions)
         }
 
         
@@ -214,18 +296,18 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
   return  { mutationFn, ...mutationOptions }}
 
     export type AddPluginMutationResult = NonNullable<Awaited<ReturnType<typeof addPlugin>>>
-    export type AddPluginMutationBody = Plugin
+    export type AddPluginMutationBody = AddPluginBody
     export type AddPluginMutationError = AxiosError<UnauthorizedErrorResponse | Error>
 
     /**
  * @summary Add or update the plugin
  */
 export const useAddPlugin = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;data: Plugin}, TContext>, axios?: AxiosRequestConfig}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;pluginName: string;data: AddPluginBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationResult<
         Awaited<ReturnType<typeof addPlugin>>,
         TError,
-        {serverName: string;data: Plugin},
+        {serverName: string;pluginName: string;data: AddPluginBody},
         TContext
       > => {
 
