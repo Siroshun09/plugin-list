@@ -55,16 +55,13 @@ func TestGetPluginsByServer(t *testing.T) {
 	assertions.Equal(*mcPlugins[0], toMCPlugin(result[0]))
 }
 
-// TestAddPlugin は PluginList.AddPlugin をテストします
-func TestAddPlugin(t *testing.T) {
+func TestAddPlugins(t *testing.T) {
 	assertions := assert.New(t)
 	plugin := createTestPlugin()
-
-	body, err := json.Marshal(plugin) // リクエストの body として、TestPlugin の JSON を作成します
-	assertions.NoError(err)
+	body := "[{\"plugin_name\":\"TestPlugin\",\"file_name\":\"TestPlugin-1.0.0.jar\",\"last_updated\":100,\"type\":\"bukkit_plugin\",\"version\":\"1.0.0\"}]"
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/servers/test/plugins", bytes.NewBuffer(body)) // /servers/test/plugins にリクエストが来たと想定します
+	r := httptest.NewRequest("GET", "/servers/test/plugins", bytes.NewBuffer([]byte(body))) // /servers/test/plugins にリクエストが来たと想定します
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -75,17 +72,38 @@ func TestAddPlugin(t *testing.T) {
 
 	m.EXPECT().SubmitMCPlugin(gomock.Any(), &mcPlugin).Return(nil) // MCPluginUseCase.SubmitMCPlugin が TestPlugin を引数として呼び出されることを期待します
 
-	plList.AddPlugin(w, r, plugin.ServerName) // サーバー名 test で当該メソッドを呼び出します
+	plList.AddPlugins(w, r, plugin.ServerName)
 
 	resp := w.Result()
 
 	defer assertions.NoError(resp.Body.Close())
 	assertions.Equal(http.StatusCreated, resp.StatusCode) // 通常、ステータスコード 201 を返します
+}
 
-	// レスポンスの Body には、渡した TestPlugin の情報と同じものが含まれます
-	var result *Plugin
-	assertions.NoError(json.NewDecoder(resp.Body).Decode(&result))
-	assertions.Equal(plugin, result)
+// TestAddPlugin は PluginList.AddPlugin をテストします
+func TestAddPlugin(t *testing.T) {
+	assertions := assert.New(t)
+	plugin := createTestPlugin()
+	body := "{\"file_name\":\"TestPlugin-1.0.0.jar\",\"last_updated\":100,\"type\":\"bukkit_plugin\",\"version\":\"1.0.0\"}"
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/servers/test/plugins/TestPlugin", bytes.NewBuffer([]byte(body))) // /servers/test/plugins/TestPlugin にリクエストが来たと想定します
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	m := mockUsecase.NewMockMCPluginUseCase(ctrl)
+	plList := NewPluginList(m)
+	mcPlugin := toMCPlugin(plugin)
+
+	m.EXPECT().SubmitMCPlugin(gomock.Any(), &mcPlugin).Return(nil) // MCPluginUseCase.SubmitMCPlugin が TestPlugin を引数として呼び出されることを期待します
+
+	plList.AddPlugin(w, r, plugin.ServerName, plugin.PluginName)
+
+	resp := w.Result()
+
+	defer assertions.NoError(resp.Body.Close())
+	assertions.Equal(http.StatusCreated, resp.StatusCode) // 通常、ステータスコード 201 を返します
 }
 
 // TestRemovePlugin は PluginList.RemovePlugin をテストします

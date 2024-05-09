@@ -53,7 +53,30 @@ func (p *PluginList) GetPluginsByServer(w http.ResponseWriter, r *http.Request, 
 	_ = json.NewEncoder(w).Encode(result)
 }
 
-func (p *PluginList) AddPlugin(w http.ResponseWriter, r *http.Request, serverName string) {
+func (p *PluginList) AddPlugins(w http.ResponseWriter, r *http.Request, serverName string) {
+	plugins := make([]*Plugin, 0)
+
+	if err := json.NewDecoder(r.Body).Decode(&plugins); err != nil {
+		sendError(w, http.StatusBadRequest, "Invalid format for Plugin array")
+		return
+	}
+
+	for _, plugin := range plugins {
+		plugin.ServerName = serverName
+
+		mcPlugin := toMCPlugin(plugin)
+
+		if err := p.useCase.SubmitMCPlugin(r.Context(), &mcPlugin); err != nil {
+			sendError(w, http.StatusInternalServerError, "Internal server error")
+			slog.Error("Failed to get plugins by serverName:", "request", &plugin, err)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (p *PluginList) AddPlugin(w http.ResponseWriter, r *http.Request, serverName string, pluginName string) {
 	var plugin Plugin
 
 	if err := json.NewDecoder(r.Body).Decode(&plugin); err != nil {
@@ -61,10 +84,8 @@ func (p *PluginList) AddPlugin(w http.ResponseWriter, r *http.Request, serverNam
 		return
 	}
 
-	if plugin.ServerName != serverName {
-		sendError(w, http.StatusBadRequest, "ServerName mismatch")
-		return
-	}
+	plugin.PluginName = pluginName
+	plugin.ServerName = serverName
 
 	mcPlugin := toMCPlugin(&plugin)
 
@@ -75,7 +96,6 @@ func (p *PluginList) AddPlugin(w http.ResponseWriter, r *http.Request, serverNam
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(plugin)
 }
 
 func (p *PluginList) DeletePlugin(w http.ResponseWriter, r *http.Request, serverName string, pluginName string) {
