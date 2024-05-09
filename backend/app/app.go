@@ -8,6 +8,7 @@ import (
 	"github.com/Siroshun09/plugin-list/usecase"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	middleware "github.com/oapi-codegen/nethttp-middleware"
 	"log"
 	"log/slog"
@@ -77,6 +78,8 @@ func (app *App) PrepareServer(port string) error {
 
 	// This is how you set up a basic chi router
 	r := chi.NewRouter()
+
+	r.Use(cors.AllowAll().Handler) // FIXME
 
 	// Use our validation middleware to check all requests against the
 	// OpenAPI schema.
