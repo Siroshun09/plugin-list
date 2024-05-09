@@ -12,11 +12,11 @@ import PluginListProvider from "../pluginListProvider.ts";
 export default class APIPluginList extends PluginListProvider {
 	public static create(apiUrl: string): APIPluginList {
 		const client = new QueryClient();
-		axios.defaults.baseURL = apiUrl
+		axios.defaults.baseURL = apiUrl;
 		return new APIPluginList(client);
 	}
 
-	private client: QueryClient;
+	private readonly client: QueryClient;
 
 	private constructor(client: QueryClient) {
 		super();
