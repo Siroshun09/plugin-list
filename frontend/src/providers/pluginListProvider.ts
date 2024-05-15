@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { JSX, ReactElement } from "react";
 import type MCPlugin from "./mcPlugin.ts";
 
 export default abstract class PluginListProvider {
@@ -14,8 +14,8 @@ export default abstract class PluginListProvider {
 
 	abstract getPluginList(server: string): readonly MCPlugin[] | undefined;
 
-	injectQueryClient(element: JSX.Element): JSX.Element {
-		return element;
+	injectQueryClient(element: { children: ReactElement }): JSX.Element {
+		return element.children;
 	}
 }
 

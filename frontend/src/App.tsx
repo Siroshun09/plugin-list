@@ -17,8 +17,7 @@ function App() {
 				const demo = await DemoPluginList.create();
 				setProvider(demo);
 			} else {
-				const api = APIPluginList.create(apiUrl);
-				setProvider(api);
+				setProvider(APIPluginList.create(apiUrl));
 			}
 		};
 		load().catch((err) => {
@@ -29,8 +28,8 @@ function App() {
 		});
 	}, []);
 
-	return provider.injectQueryClient(
-		<>
+	return (
+		<provider.injectQueryClient>
 			<div className="flex flex-wrap w-screen justify-center">
 				<div id="sidebar" className="w-1/4 bg-gray-50 h-screen">
 					<SideBar
@@ -42,7 +41,7 @@ function App() {
 					<PluginList provider={provider} serverName={server} />
 				</div>
 			</div>
-		</>,
+		</provider.injectQueryClient>
 	);
 }
 

@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import axios from "axios";
 import type React from "react";
+import type { ReactElement } from "react";
 import {
 	type PluginAllOf,
 	useGetPluginsByServer,
@@ -11,16 +12,8 @@ import PluginListProvider from "../pluginListProvider.ts";
 
 export default class APIPluginList extends PluginListProvider {
 	public static create(apiUrl: string): APIPluginList {
-		const client = new QueryClient();
 		axios.defaults.baseURL = apiUrl;
-		return new APIPluginList(client);
-	}
-
-	private readonly client: QueryClient;
-
-	private constructor(client: QueryClient) {
-		super();
-		this.client = client;
+		return new APIPluginList();
 	}
 
 	getServerList(): readonly string[] {
@@ -34,9 +27,11 @@ export default class APIPluginList extends PluginListProvider {
 		return plugins?.data.map((plugin) => toMCPlugin(plugin));
 	}
 
-	injectQueryClient(element: React.JSX.Element): React.JSX.Element {
+	injectQueryClient(element: { children: ReactElement }): React.JSX.Element {
 		return (
-			<QueryClientProvider client={this.client}>{element}</QueryClientProvider>
+			<QueryClientProvider client={new QueryClient()}>
+				{element.children}
+			</QueryClientProvider>
 		);
 	}
 }
