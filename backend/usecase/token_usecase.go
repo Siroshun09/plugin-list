@@ -32,13 +32,13 @@ func (r tokenRepositoryUseCase) CreateNewRandomToken(ctx context.Context, length
 		return nil, err
 	}
 
-	token := domain.NewToken(hex.EncodeToString(b), time.Now())
+	token := domain.Token{Value: hex.EncodeToString(b), Created: time.Now()}
 
 	if err := r.repo.RegisterToken(ctx, token); err != nil {
 		return nil, err
 	}
 
-	return token, nil
+	return &token, nil
 }
 
 func (r tokenRepositoryUseCase) GetAllTokens(ctx context.Context) ([]*domain.Token, error) {

@@ -45,7 +45,7 @@ func (c *sqliteConnection) NewMCPluginRepository() (repository.MCPluginRepositor
 	return mcPluginRepository{c}, nil
 }
 
-func (m mcPluginRepository) CreateOrUpdateMCPlugin(_ context.Context, plugin *domain.MCPlugin) (returnErr error) {
+func (m mcPluginRepository) CreateOrUpdateMCPlugin(_ context.Context, plugin domain.MCPlugin) (returnErr error) {
 	rows, err := m.conn.db.Query(createOrUpdateMcPluginQuery, plugin.PluginName, plugin.ServerName, plugin.FileName, plugin.Version, plugin.Type, plugin.LastUpdated.UnixMilli())
 
 	if err != nil {

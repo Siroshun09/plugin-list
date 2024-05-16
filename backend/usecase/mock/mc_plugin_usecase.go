@@ -85,7 +85,7 @@ func (mr *MockMCPluginUseCaseMockRecorder) GetServerNames(ctx any) *gomock.Call 
 }
 
 // SubmitMCPlugin mocks base method.
-func (m *MockMCPluginUseCase) SubmitMCPlugin(ctx context.Context, plugin *domain.MCPlugin) error {
+func (m *MockMCPluginUseCase) SubmitMCPlugin(ctx context.Context, plugin domain.MCPlugin) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SubmitMCPlugin", ctx, plugin)
 	ret0, _ := ret[0].(error)

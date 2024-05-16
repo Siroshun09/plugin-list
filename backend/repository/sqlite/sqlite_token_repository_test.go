@@ -28,7 +28,7 @@ func TestTokenRepository(t *testing.T) {
 
 	assertion.False(repo.ValidateToken(context.TODO(), "no tokens registered")) // At this time, no tokens are registered in the database
 
-	token := domain.NewToken("First token", time.UnixMilli(100))
+	token := domain.Token{Value: "First token", Created: time.UnixMilli(100)}
 	assertion.Nil(repo.RegisterToken(context.TODO(), token))
 
 	assertion.True(repo.ValidateToken(context.TODO(), token.Value))
@@ -38,7 +38,7 @@ func TestTokenRepository(t *testing.T) {
 
 	assertion.Nil(err)
 	assertion.Equal(1, len(tokens))
-	assertion.Equal(token, tokens[0])
+	assertion.Equal(&token, tokens[0])
 
 	assertion.Nil(repo.UnregisterToken(context.TODO(), token.Value))
 

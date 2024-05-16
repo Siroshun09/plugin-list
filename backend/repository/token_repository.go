@@ -6,7 +6,7 @@ import (
 )
 
 type TokenRepository interface {
-	RegisterToken(ctx context.Context, token *domain.Token) error
+	RegisterToken(ctx context.Context, token domain.Token) error
 	UnregisterToken(ctx context.Context, token string) error
 	LoadTokens(ctx context.Context) ([]*domain.Token, error)
 	ValidateToken(ctx context.Context, token string) (bool, error)

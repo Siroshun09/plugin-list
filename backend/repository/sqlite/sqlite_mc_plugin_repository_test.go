@@ -38,7 +38,7 @@ func TestMcPluginRepository(t *testing.T) {
 
 	// Save `TestPlugin` data (New plugin)
 
-	err = repo.CreateOrUpdateMCPlugin(context.TODO(), &testPlugin)
+	err = repo.CreateOrUpdateMCPlugin(context.TODO(), testPlugin)
 
 	assertion.Nil(err)
 	checkTestPlugin(repo, &testPlugin, assertion)
@@ -48,7 +48,7 @@ func TestMcPluginRepository(t *testing.T) {
 	testPlugin.FileName = "TestPlugin-1.0.1.jar"
 	testPlugin.Version = "1.0.1"
 
-	err = repo.CreateOrUpdateMCPlugin(context.TODO(), &testPlugin)
+	err = repo.CreateOrUpdateMCPlugin(context.TODO(), testPlugin)
 
 	assertion.Nil(err)
 	checkTestPlugin(repo, &testPlugin, assertion)

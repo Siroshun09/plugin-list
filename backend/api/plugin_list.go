@@ -44,9 +44,10 @@ func (p *PluginList) GetPluginsByServer(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	result := make([]Plugin, len(plugins))
-	for i, p := range plugins {
-		result[i] = toPlugin(p)
+	result := make([]*Plugin, len(plugins))
+	for i, plugin := range plugins {
+		converted := toPlugin(*plugin)
+		result[i] = &converted
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -64,9 +65,9 @@ func (p *PluginList) AddPlugins(w http.ResponseWriter, r *http.Request, serverNa
 	for _, plugin := range plugins {
 		plugin.ServerName = serverName
 
-		mcPlugin := toMCPlugin(plugin)
+		mcPlugin := toMCPlugin(*plugin)
 
-		if err := p.useCase.SubmitMCPlugin(r.Context(), &mcPlugin); err != nil {
+		if err := p.useCase.SubmitMCPlugin(r.Context(), mcPlugin); err != nil {
 			sendError(w, http.StatusInternalServerError, "Internal server error")
 			slog.Error("Failed to get plugins by serverName:", "request", &plugin, err)
 			return
@@ -87,9 +88,9 @@ func (p *PluginList) AddPlugin(w http.ResponseWriter, r *http.Request, serverNam
 	plugin.PluginName = pluginName
 	plugin.ServerName = serverName
 
-	mcPlugin := toMCPlugin(&plugin)
+	mcPlugin := toMCPlugin(plugin)
 
-	if err := p.useCase.SubmitMCPlugin(r.Context(), &mcPlugin); err != nil {
+	if err := p.useCase.SubmitMCPlugin(r.Context(), mcPlugin); err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
 		slog.Error("Failed to get plugins by serverName:", "request", plugin, err)
 		return
@@ -122,7 +123,7 @@ func (p *PluginList) GetServerNames(w http.ResponseWriter, r *http.Request) {
 
 /* Helper methods to convert MCPlugin <-> Plugin */
 
-func toMCPlugin(plugin *Plugin) domain.MCPlugin {
+func toMCPlugin(plugin Plugin) domain.MCPlugin {
 	return domain.MCPlugin{
 		PluginName:  plugin.PluginName,
 		ServerName:  plugin.ServerName,
@@ -133,7 +134,7 @@ func toMCPlugin(plugin *Plugin) domain.MCPlugin {
 	}
 }
 
-func toPlugin(p *domain.MCPlugin) Plugin {
+func toPlugin(p domain.MCPlugin) Plugin {
 	return Plugin{
 		FileName:    p.FileName,
 		LastUpdated: p.LastUpdated.UnixMilli(),
