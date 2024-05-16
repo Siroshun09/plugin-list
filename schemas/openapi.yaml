@@ -19,7 +19,7 @@ paths:
                 type: array
                 items:
                   type: string
-                example: ["test_1", "test_2"]
+                example: ["test_server_1", "test_server_2"]
         default:
           description: unexpected error
           content:
@@ -38,6 +38,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "test_server_1"
       responses:
         '200':
           description: the list of plugins that are installed in the specified server
@@ -66,8 +67,9 @@ paths:
           required: true
           schema:
             type: string
+          example: "test_server_1"
       requestBody:
-        description: Plugins to add to the list
+        description: Plugins to add or update
         required: true
         content:
           application/json:
@@ -79,12 +81,15 @@ paths:
                   plugin_name:
                     type: string
                     description: Name of the plugin
+                    example: "TestPlugin"
                   file_name:
                     type: string
                     description: File name of the plugin
+                    example: "TestPlugin-1.0.jar"
                   version:
                     type: string
                     description: Version of the plugin
+                    example: "1.0"
                   type:
                     type: string
                     description: Type of the plugin
@@ -92,7 +97,8 @@ paths:
                   last_updated:
                     type: integer
                     format: int64
-                    description: Unix time when the plugin was last updated
+                    description: Unix time when the plugin was last updated (milliseconds)
+                    example: 1715817600000
       responses:
         '201':
           description: success
@@ -118,12 +124,14 @@ paths:
           required: true
           schema:
             type: string
+          example: "test_server_1"
         - name: plugin_name
           in: path
           description: the plugin name to get information of the plugin
           required: true
           schema:
             type: string
+          example: "TestPlugin"
       requestBody:
         description: A new plugin data
         required: true
@@ -135,9 +143,11 @@ paths:
                 file_name:
                   type: string
                   description: File name of the plugin
+                  example: "TestPlugin-1.0.jar"
                 version:
                   type: string
                   description: Version of the plugin
+                  example: "1.0"
                 type:
                   type: string
                   description: Type of the plugin
@@ -145,7 +155,8 @@ paths:
                 last_updated:
                   type: integer
                   format: int64
-                  description: Unix time when the plugin was last updated
+                  description: Unix time when the plugin was last updated (milliseconds)
+                  example: 1715817600000
       responses:
         '201':
           description: success
@@ -170,12 +181,14 @@ paths:
           required: true
           schema:
             type: string
+          example: "test_server_1"
         - name: plugin_name
           in: path
           description: the plugin name to get information of the plugin
           required: true
           schema:
             type: string
+          example: "TestPlugin"
       responses:
         '204':
           description: plugin deleted
@@ -190,6 +203,13 @@ paths:
 components:
   schemas:
     Plugin:
+      example:
+        plugin_name: "TestPlugin"
+        server_name: "test_server_1"
+        file_name: "TestPlugin-1.0.jar"
+        version: "1.0"
+        type: "bukkit_plugin"
+        last_updated: 1715817600000
       allOf:
         - properties:
             plugin_name:
@@ -207,11 +227,10 @@ components:
             type:
               type: string
               description: Type of the plugin
-              example: "bukkit_plugin"
             last_updated:
               type: integer
               format: int64
-              description: Unix time when the plugin was last updated
+              description: Unix time when the plugin was last updated (milliseconds)
           required:
             - plugin_name
             - server_name
@@ -239,4 +258,4 @@ components:
       description: A token to create/edit/delete plugins via API
   responses:
     UnauthorizedError:
-      description: Access token is missing or invalid
+      description: access token is missing or invalid
