@@ -20,9 +20,9 @@ const (
 		)
 		`
 
-	registerTokenQuery = "INSERT INTO tokens (token, created_at) VALUES (?, ?)"
+	insertTokenQuery = "INSERT INTO tokens (token, created_at) VALUES (?, ?)"
 
-	unregisterTokenQuery = "DELETE FROM tokens WHERE token = ?"
+	deleteTokenQuery = "DELETE FROM tokens WHERE token = ?"
 
 	selectAllTokenQuery = "SELECT token, created_at FROM tokens"
 
@@ -38,7 +38,7 @@ func (c *sqliteConnection) NewTokenRepository() (repository.TokenRepository, err
 }
 
 func (t tokenRepository) AddToken(_ context.Context, token domain.Token) (returnErr error) {
-	rows, err := t.conn.db.Query(registerTokenQuery, token.Value, token.Created.UnixMilli())
+	rows, err := t.conn.db.Query(insertTokenQuery, token.Value, token.Created.UnixMilli())
 
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func (t tokenRepository) AddToken(_ context.Context, token domain.Token) (return
 }
 
 func (t tokenRepository) RemoveToken(_ context.Context, token string) (returnErr error) {
-	rows, err := t.conn.db.Query(unregisterTokenQuery, token)
+	rows, err := t.conn.db.Query(deleteTokenQuery, token)
 
 	if err != nil {
 		return err

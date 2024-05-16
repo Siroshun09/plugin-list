@@ -24,7 +24,8 @@ const (
 			PRIMARY KEY (plugin_name, server_name)
 		)
 		`
-	createOrUpdateMcPluginQuery = `
+
+	insertOrUpdateMcPluginQuery = `
 		INSERT INTO mc_plugins (plugin_name, server_name, filename, version, type, last_updated) VALUES (?, ?, ?, ?, ?, ?) 
 		ON CONFLICT (plugin_name, server_name) DO UPDATE SET filename = excluded.filename, version = excluded.version,
 		type = excluded.type, last_updated = excluded.last_updated
@@ -32,9 +33,9 @@ const (
 
 	deleteMcPluginQuery = `DELETE FROM mc_plugins WHERE plugin_name = ? AND server_name = ?`
 
-	selectMCPluginsByServerName = "SELECT * FROM mc_plugins WHERE server_name=?"
+	selectMCPluginsByServerNameQuery = "SELECT * FROM mc_plugins WHERE server_name=?"
 
-	selectServerNames = "SELECT DISTINCT server_name FROM mc_plugins"
+	selectServerNamesQuery = "SELECT DISTINCT server_name FROM mc_plugins"
 )
 
 func (c *sqliteConnection) NewMCPluginRepository() (repository.MCPluginRepository, error) {
@@ -46,7 +47,7 @@ func (c *sqliteConnection) NewMCPluginRepository() (repository.MCPluginRepositor
 }
 
 func (m mcPluginRepository) CreateOrUpdateMCPlugin(_ context.Context, plugin domain.MCPlugin) (returnErr error) {
-	rows, err := m.conn.db.Query(createOrUpdateMcPluginQuery, plugin.PluginName, plugin.ServerName, plugin.FileName, plugin.Version, plugin.Type, plugin.LastUpdated.UnixMilli())
+	rows, err := m.conn.db.Query(insertOrUpdateMcPluginQuery, plugin.PluginName, plugin.ServerName, plugin.FileName, plugin.Version, plugin.Type, plugin.LastUpdated.UnixMilli())
 
 	if err != nil {
 		return err
@@ -80,7 +81,7 @@ func (m mcPluginRepository) DeleteMCPlugin(_ context.Context, serverName string,
 }
 
 func (m mcPluginRepository) GetMCPluginsByServerName(_ context.Context, serverName string) (plugins []*domain.MCPlugin, returnErr error) {
-	rows, err := m.conn.db.Query(selectMCPluginsByServerName, serverName)
+	rows, err := m.conn.db.Query(selectMCPluginsByServerNameQuery, serverName)
 
 	if err != nil {
 		return nil, err
@@ -109,7 +110,7 @@ func (m mcPluginRepository) GetMCPluginsByServerName(_ context.Context, serverNa
 }
 
 func (m mcPluginRepository) GetServerNames(_ context.Context) (serverNames []string, returnErr error) {
-	rows, err := m.conn.db.Query(selectServerNames)
+	rows, err := m.conn.db.Query(selectServerNamesQuery)
 
 	if err != nil {
 		return nil, err
