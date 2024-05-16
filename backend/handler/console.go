@@ -18,6 +18,12 @@ type command struct {
 	handler     func(input string)
 }
 
+var noArgs = make([]string, 0)
+
+func args(args ...string) []string {
+	return args
+}
+
 func HandleConsoleInput(tokenUseCase usecase.TokenUseCase, canceller context.CancelFunc) {
 	commands := initCommandMap(tokenUseCase, canceller)
 
@@ -60,131 +66,155 @@ func HandleConsoleInput(tokenUseCase usecase.TokenUseCase, canceller context.Can
 	}
 }
 
+func printNewLine() {
+	fmt.Print("> ")
+}
+
 func initCommandMap(tokenUseCase usecase.TokenUseCase, canceller context.CancelFunc) map[string]command {
 	return map[string]command{
 		"stop": {[]string{}, "Stop the application", func(string) {
 			canceller()
 		}},
-		"newtoken": {[]string{"{bytes}"}, "Create a new token", func(input string) {
-			args := strings.Split(input, " ")
+		"newtoken":        {args("{bytes}"), "Create a new token", createNewToken(tokenUseCase)},
+		"tokens":          {noArgs, "Show tokens", getTokens(tokenUseCase)},
+		"validatetoken":   {args("<token>"), "Validate the token", validateToken(tokenUseCase)},
+		"invalidatetoken": {args("<token>"), "Invalidate the token", invalidateToken(tokenUseCase)},
+		"cleartokens":     {noArgs, "Invalidate all tokens", clearTokens(tokenUseCase)},
+	}
+}
 
-			var length int
+func createNewToken(tokenUseCase usecase.TokenUseCase) func(input string) {
+	return func(input string) {
+		args := strings.Split(input, " ")
 
-			if len(args) == 2 {
-				var err error
-				length, err = strconv.Atoi(args[1])
+		var length int
 
-				if err != nil {
-					slog.Error("Invalid number", args[1], err)
-					return
-				}
+		if len(args) == 2 {
+			var err error
+			length, err = strconv.Atoi(args[1])
+
+			if err != nil {
+				slog.Error("Invalid number", args[1], err)
+				return
+			}
+		} else {
+			length = 16
+		}
+
+		token, err := tokenUseCase.CreateNewRandomToken(context.Background(), length)
+
+		if err != nil {
+			slog.Error("An error occurred while creating new token", err)
+			return
+		}
+
+		slog.Info("Created a new token (" + strconv.Itoa(length) + " bytes): " + token.Value)
+	}
+}
+
+func getTokens(tokenUseCase usecase.TokenUseCase) func(string) {
+	return func(string) {
+		tokens, err := tokenUseCase.GetAllTokens(context.Background())
+
+		if err != nil {
+			slog.Error("An error occurred while creating new token", err)
+			return
+		}
+
+		if len(tokens) == 0 {
+			slog.Info("There are no tokens")
+			return
+		}
+
+		slog.Info("Current valid tokens:")
+		for _, token := range tokens {
+			slog.Info(" " + token.Value)
+		}
+	}
+}
+
+func validateToken(tokenUseCase usecase.TokenUseCase) func(input string) {
+	return func(input string) {
+		args := strings.Split(input, " ")
+
+		if len(args) < 2 {
+			slog.Error("No tokens provided")
+			return
+		}
+
+		for i := 1; i < len(args); i++ {
+			token := args[i]
+
+			if len(token) == 0 {
+				continue
+			}
+
+			valid, err := tokenUseCase.ValidateToken(context.Background(), token)
+
+			if err != nil {
+				slog.Error("An error occurred while validating the token", err)
+				return
+			}
+
+			if valid {
+				slog.Info(token + " is valid")
 			} else {
-				length = 16
+				slog.Info(token + " is invalid")
+			}
+		}
+	}
+}
+
+func invalidateToken(tokenUseCase usecase.TokenUseCase) func(input string) {
+	return func(input string) {
+		args := strings.Split(input, " ")
+
+		if len(args) < 2 {
+			slog.Error("No tokens provided")
+			return
+		}
+
+		for i := 1; i < len(args); i++ {
+			token := args[i]
+
+			if len(token) == 0 {
+				continue
 			}
 
-			token, err := tokenUseCase.CreateNewRandomToken(context.Background(), length)
-
-			if err != nil {
-				slog.Error("An error occurred while creating new token", err)
+			if err := tokenUseCase.InvalidateToken(context.Background(), token); err != nil {
+				slog.Error("An error occurred while invalidating the token", err)
 				return
 			}
 
-			slog.Info("Created a new token (" + strconv.Itoa(length) + " bytes): " + token.Value)
-		}},
-		"tokens": {[]string{}, "Show tokens", func(string) {
-			tokens, err := tokenUseCase.GetAllTokens(context.Background())
+			slog.Info("Invalidated token: " + token)
+		}
+	}
+}
 
-			if err != nil {
-				slog.Error("An error occurred while creating new token", err)
+func clearTokens(tokenUseCase usecase.TokenUseCase) func(string) {
+	return func(string) {
+		tokens, err := tokenUseCase.GetAllTokens(context.Background())
+
+		if err != nil {
+			slog.Error("An error occurred while collecting tokens", err)
+			return
+		}
+
+		if len(tokens) == 0 {
+			slog.Info("There are no tokens")
+			return
+		}
+
+		for _, token := range tokens {
+			if err := tokenUseCase.InvalidateToken(context.Background(), token.Value); err != nil {
+				slog.Error("An error occurred while invalidating the token", err)
 				return
 			}
 
-			if len(tokens) == 0 {
-				slog.Info("There are no tokens")
-				return
-			}
+			slog.Info("Invalidated token: " + token.Value)
+		}
 
-			slog.Info("Current valid tokens:")
-			for _, token := range tokens {
-				slog.Info(" " + token.Value)
-			}
-		}},
-		"validatetoken": {[]string{"<token>"}, "Validate the token", func(input string) {
-			args := strings.Split(input, " ")
-
-			if len(args) < 2 {
-				slog.Error("No tokens provided")
-				return
-			}
-
-			for i := 1; i < len(args); i++ {
-				token := args[i]
-
-				if len(token) == 0 {
-					continue
-				}
-
-				valid, err := tokenUseCase.ValidateToken(context.Background(), token)
-
-				if err != nil {
-					slog.Error("An error occurred while validating the token", err)
-					return
-				}
-
-				if valid {
-					slog.Info(token + " is valid")
-				} else {
-					slog.Info(token + " is invalid")
-				}
-			}
-		}},
-		"invalidatetoken": {[]string{"<token>"}, "Invalidate the token", func(input string) {
-			args := strings.Split(input, " ")
-
-			if len(args) < 2 {
-				slog.Error("No tokens provided")
-				return
-			}
-
-			for i := 1; i < len(args); i++ {
-				token := args[i]
-
-				if len(token) == 0 {
-					continue
-				}
-
-				if err := tokenUseCase.InvalidateToken(context.Background(), token); err != nil {
-					slog.Error("An error occurred while invalidating the token", err)
-					return
-				}
-
-				slog.Info("Invalidated token: " + token)
-			}
-		}},
-		"cleartokens": {[]string{}, "Invalidate all tokens", func(string) {
-			tokens, err := tokenUseCase.GetAllTokens(context.Background())
-
-			if err != nil {
-				slog.Error("An error occurred while collecting tokens", err)
-				return
-			}
-
-			if len(tokens) == 0 {
-				slog.Info("There are no tokens")
-				return
-			}
-
-			for _, token := range tokens {
-				if err := tokenUseCase.InvalidateToken(context.Background(), token.Value); err != nil {
-					slog.Error("An error occurred while invalidating the token", err)
-					return
-				}
-
-				slog.Info("Invalidated token: " + token.Value)
-			}
-
-			slog.Info(strconv.Itoa(len(tokens)) + " tokens are invalidated.")
-		}},
+		slog.Info(strconv.Itoa(len(tokens)) + " tokens are invalidated.")
 	}
 }
 
@@ -210,8 +240,4 @@ func showHelp(commands map[string]command) {
 		}
 		slog.Info(" " + label + args + " - " + cmd.description)
 	}
-}
-
-func printNewLine() {
-	fmt.Print("> ")
 }
