@@ -14,6 +14,7 @@ var (
 	errInvalidToken           = errors.New("invalid token")
 )
 
+// ValidateToken はヘッダーに付与された X-API-KEY を読み取り、トークンが有効かを判定します。
 func ValidateToken(useCase usecase.TokenUseCase, ctx context.Context, input *openapi3filter.AuthenticationInput) error {
 	key := input.RequestValidationInput.Request.Header.Get(apiKeyHeader)
 

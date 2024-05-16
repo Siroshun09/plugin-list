@@ -18,16 +18,23 @@ import (
 	"time"
 )
 
+// App は API サーバーを稼働させるのに必要なものを保持し、API サーバーを起動・終了するメソッドを提供します。
 type App struct {
+	// domain.MCPlugin を取得・保存・削除するための usecase.MCPluginUseCase
 	McPluginUseCase usecase.MCPluginUseCase
-	TokenUseCase    usecase.TokenUseCase
-	Server          *http.Server
+	// domain.Token を取得するための usecase.TokenUseCase
+	TokenUseCase usecase.TokenUseCase
+	// http.Server インスタンス
+	Server *http.Server
 }
 
 var (
 	errInvalidSecuritySchema = errors.New("invalid Security Schema")
 )
 
+// NewApp は sqlite.Connection を使用して新しい App を作成します。
+// このメソッドでは、データベースへのテーブル作成も行われます。
+// App.Server() はこの段階では初期化されておらず、nil を返します。
 func NewApp(conn sqlite.Connection) (*App, error) {
 	slog.Info("Initializing the repository for MCPlugins...")
 	mcPluginRepo, err := conn.NewMCPluginRepository()
@@ -50,6 +57,7 @@ func NewApp(conn sqlite.Connection) (*App, error) {
 	return &App{mcPluginUseCase, tokenUseCase, nil}, nil
 }
 
+// PrepareServer は指定されたポート番号を使用して API サーバーを起動する準備を行います。
 func (app *App) PrepareServer(port string) error {
 	// https://github.com/deepmap/oapi-codegen/blob/master/examples/petstore-expanded/chi/petstore.go
 	swagger, err := api.GetSwagger()
@@ -96,12 +104,14 @@ func (app *App) PrepareServer(port string) error {
 	return nil
 }
 
+// Start は API サーバーを起動し、通信を待機します。
 func (app *App) Start() {
 	if err := app.Server.ListenAndServe(); err != nil {
 		log.Fatalf("Failed to listen and serve: %+v", err)
 	}
 }
 
+// HandleShutdown は渡された context.Context が完了した際に、API サーバーのシャットダウンを行います。
 func (app *App) HandleShutdown(ctx context.Context) error {
 	<-ctx.Done()
 	slog.Info("Stopping the web server...")

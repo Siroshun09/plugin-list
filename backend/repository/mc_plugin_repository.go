@@ -5,6 +5,7 @@ import (
 	"github.com/Siroshun09/plugin-list/domain"
 )
 
+// MCPluginRepository は domain.MCPlugin のデータ管理を行います。
 type MCPluginRepository interface {
 	// CreateOrUpdateMCPlugin はプラグイン情報を作成または更新します。
 	CreateOrUpdateMCPlugin(ctx context.Context, plugin domain.MCPlugin) error

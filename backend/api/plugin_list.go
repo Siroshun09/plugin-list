@@ -20,6 +20,7 @@ type PluginList struct {
 // Make sure we conform to ServerInterface
 var _ ServerInterface = (*PluginList)(nil)
 
+// NewPluginList は usecase.MCPluginUseCase を使用して OpenAPI Schema に定義された API を実装した PluginList を作成します。
 func NewPluginList(useCase usecase.MCPluginUseCase) *PluginList {
 	return &PluginList{useCase}
 }

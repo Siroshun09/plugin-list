@@ -18,6 +18,7 @@ type MCPluginUseCase interface {
 	GetServerNames(ctx context.Context) ([]string, error)
 }
 
+// NewMCPluginUseCase は repository.MCPluginRepository を使用した新しい MCPluginUseCase を作成します。
 func NewMCPluginUseCase(repo repository.MCPluginRepository) MCPluginUseCase {
 	return repositoryUseCase{repo}
 }

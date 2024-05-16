@@ -24,6 +24,7 @@ func args(args ...string) []string {
 	return args
 }
 
+// HandleConsoleInput は標準入力からの入力を待機し、コンソールコマンドの実行を処理します。
 func HandleConsoleInput(tokenUseCase usecase.TokenUseCase, canceller context.CancelFunc) {
 	commands := initCommandMap(tokenUseCase, canceller)
 

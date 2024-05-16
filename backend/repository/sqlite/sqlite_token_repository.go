@@ -37,7 +37,7 @@ func (c *sqliteConnection) NewTokenRepository() (repository.TokenRepository, err
 	return tokenRepository{c}, nil
 }
 
-func (t tokenRepository) RegisterToken(_ context.Context, token domain.Token) (returnErr error) {
+func (t tokenRepository) AddToken(_ context.Context, token domain.Token) (returnErr error) {
 	rows, err := t.conn.db.Query(registerTokenQuery, token.Value, token.Created.UnixMilli())
 
 	if err != nil {
@@ -54,7 +54,7 @@ func (t tokenRepository) RegisterToken(_ context.Context, token domain.Token) (r
 	return nil
 }
 
-func (t tokenRepository) UnregisterToken(_ context.Context, token string) (returnErr error) {
+func (t tokenRepository) RemoveToken(_ context.Context, token string) (returnErr error) {
 	rows, err := t.conn.db.Query(unregisterTokenQuery, token)
 
 	if err != nil {
