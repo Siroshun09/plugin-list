@@ -26,7 +26,7 @@ func args(args ...string) []string {
 
 // HandleConsoleInput は標準入力からの入力を待機し、コンソールコマンドの実行を処理します。
 func HandleConsoleInput(tokenUseCase usecase.TokenUseCase, canceller context.CancelFunc) {
-	commands := initCommandMap(tokenUseCase, canceller)
+	commands := initCommandMap(tokenUseCase)
 
 	slog.Info("Type 'help' for show available commands!")
 
@@ -54,6 +54,11 @@ func HandleConsoleInput(tokenUseCase usecase.TokenUseCase, canceller context.Can
 			continue
 		}
 
+		if inputs[0] == "stop" {
+			canceller()
+			return
+		}
+
 		cmd, exists := commands[inputs[0]]
 
 		if !exists {
@@ -71,10 +76,10 @@ func printNewLine() {
 	fmt.Print("> ")
 }
 
-func initCommandMap(tokenUseCase usecase.TokenUseCase, canceller context.CancelFunc) map[string]command {
+func initCommandMap(tokenUseCase usecase.TokenUseCase) map[string]command {
 	return map[string]command{
 		"stop": {[]string{}, "Stop the application", func(string) {
-			canceller()
+			// do nothing; stop command will be handled in HandleConsoleInput
 		}},
 		"newtoken":        {args("{bytes}"), "Create a new token", createNewToken(tokenUseCase)},
 		"tokens":          {noArgs, "Show tokens", getTokens(tokenUseCase)},
