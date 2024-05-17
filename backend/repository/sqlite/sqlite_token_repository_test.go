@@ -23,7 +23,7 @@ func TestTokenRepository(t *testing.T) {
 
 	assertion.Nil(err)
 
-	repo, err := c.NewTokenRepository() // TokenRepository を作成 (データベースへのテーブル作成)
+	repo, err := c.NewTokenRepository(context.TODO()) // TokenRepository を作成 (データベースへのテーブル作成)
 
 	assertion.Nil(err)
 

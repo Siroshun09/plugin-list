@@ -35,16 +35,16 @@ var (
 // NewApp は sqlite.Connection を使用して新しい App を作成します。
 // このメソッドでは、データベースへのテーブル作成も行われます。
 // App.Server() はこの段階では初期化されておらず、nil を返します。
-func NewApp(conn sqlite.Connection) (*App, error) {
+func NewApp(ctx context.Context, conn sqlite.Connection) (*App, error) {
 	slog.Info("Initializing the repository for MCPlugins...")
-	mcPluginRepo, err := conn.NewMCPluginRepository()
+	mcPluginRepo, err := conn.NewMCPluginRepository(ctx)
 
 	if err != nil {
 		slog.Error("Failed to initialize the repository for MCPlugins", err)
 		os.Exit(1)
 	}
 
-	tokenRepo, err := conn.NewTokenRepository()
+	tokenRepo, err := conn.NewTokenRepository(ctx)
 
 	if err != nil {
 		slog.Error("Failed to initialize the repository for tokens", err)

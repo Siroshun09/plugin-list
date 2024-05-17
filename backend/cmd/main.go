@@ -33,7 +33,7 @@ func main() {
 	}(conn)
 
 	slog.Info("Initializing the application...")
-	a, err := app.NewApp(conn)
+	a, err := app.NewApp(context.Background(), conn)
 
 	if err != nil {
 		slog.Error("Failed to initialize the application", err)

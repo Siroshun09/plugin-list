@@ -30,16 +30,16 @@ const (
 	validateTokenQuery = "SELECT COUNT(token) FROM tokens WHERE token = ?"
 )
 
-func (c *sqliteConnection) NewTokenRepository() (repository.TokenRepository, error) {
-	if _, err := c.db.Exec(tokenTableSchema); err != nil {
+func (c *sqliteConnection) NewTokenRepository(ctx context.Context) (repository.TokenRepository, error) {
+	if _, err := c.db.ExecContext(ctx, tokenTableSchema); err != nil {
 		return nil, err
 	}
 
 	return tokenRepository{c}, nil
 }
 
-func (t tokenRepository) AddToken(_ context.Context, token domain.Token) (returnErr error) {
-	rows, err := t.conn.db.Query(insertTokenQuery, token.Value, token.Created.UnixMilli())
+func (t tokenRepository) AddToken(ctx context.Context, token domain.Token) (returnErr error) {
+	rows, err := t.conn.db.QueryContext(ctx, insertTokenQuery, token.Value, token.Created.UnixMilli())
 
 	if err != nil {
 		return err
@@ -55,8 +55,8 @@ func (t tokenRepository) AddToken(_ context.Context, token domain.Token) (return
 	return nil
 }
 
-func (t tokenRepository) RemoveToken(_ context.Context, token string) (returnErr error) {
-	rows, err := t.conn.db.Query(deleteTokenQuery, token)
+func (t tokenRepository) RemoveToken(ctx context.Context, token string) (returnErr error) {
+	rows, err := t.conn.db.QueryContext(ctx, deleteTokenQuery, token)
 
 	if err != nil {
 		return err
@@ -72,8 +72,8 @@ func (t tokenRepository) RemoveToken(_ context.Context, token string) (returnErr
 	return nil
 }
 
-func (t tokenRepository) LoadTokens(_ context.Context) (tokens []*domain.Token, returnErr error) {
-	rows, err := t.conn.db.Query(selectAllTokenQuery)
+func (t tokenRepository) LoadTokens(ctx context.Context) (tokens []*domain.Token, returnErr error) {
+	rows, err := t.conn.db.QueryContext(ctx, selectAllTokenQuery)
 
 	if err != nil {
 		return nil, err
@@ -101,8 +101,8 @@ func (t tokenRepository) LoadTokens(_ context.Context) (tokens []*domain.Token, 
 	return result, nil
 }
 
-func (t tokenRepository) ValidateToken(_ context.Context, token string) (valid bool, returnErr error) {
-	rows, err := t.conn.db.Query(validateTokenQuery, token)
+func (t tokenRepository) ValidateToken(ctx context.Context, token string) (valid bool, returnErr error) {
+	rows, err := t.conn.db.QueryContext(ctx, validateTokenQuery, token)
 
 	if err != nil {
 		return false, err

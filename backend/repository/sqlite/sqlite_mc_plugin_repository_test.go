@@ -24,7 +24,7 @@ func TestMCPluginRepository(t *testing.T) {
 
 	assertion.Nil(err)
 
-	repo, err := c.NewMCPluginRepository() // MCPluginRepository を作成 (データベースへのテーブル作成)
+	repo, err := c.NewMCPluginRepository(context.TODO()) // MCPluginRepository を作成 (データベースへのテーブル作成)
 	assertion.Nil(err)
 
 	// このテストで使用するサンプルのプラグイン情報

@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"context"
 	"database/sql"
 	"github.com/Siroshun09/plugin-list/repository"
 	_ "modernc.org/sqlite"
@@ -18,9 +19,9 @@ type Connection interface {
 	// Close は SQLite データベースとの接続を終了します。
 	Close() error
 	// NewMCPluginRepository はこの接続を使用した repository.MCPluginRepository を作成します。
-	NewMCPluginRepository() (repository.MCPluginRepository, error)
+	NewMCPluginRepository(ctx context.Context) (repository.MCPluginRepository, error)
 	// NewTokenRepository はこの接続を使用した repository.TokenRepository を作成します。
-	NewTokenRepository() (repository.TokenRepository, error)
+	NewTokenRepository(ctx context.Context) (repository.TokenRepository, error)
 }
 
 type sqliteConnection struct {
