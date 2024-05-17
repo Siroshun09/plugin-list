@@ -36,9 +36,8 @@ func TestGetPluginsByServer(t *testing.T) {
 	m := mockUsecase.NewMockMCPluginUseCase(ctrl)
 	plList := NewPluginList(m)
 
-	mcPlugins := make([]*domain.MCPlugin, 1)
-	mcPlugin := createTestMCPlugin()
-	mcPlugins[0] = &mcPlugin
+	mcPlugins := make([]domain.MCPlugin, 1)
+	mcPlugins[0] = createTestMCPlugin()
 	m.EXPECT().GetMCPluginsByServerName(gomock.Any(), "test").Return(mcPlugins, nil) // MCPluginUseCase.GetMCPluginsByServerName はサーバー名 test で呼び出されることが期待されます
 
 	plList.GetPluginsByServer(w, r, "test") // サーバー名 test で当該メソッドを呼び出します
@@ -50,10 +49,10 @@ func TestGetPluginsByServer(t *testing.T) {
 	// 返されたプラグインの一覧を確認します。
 	// モックによって1つの TestPlugin を含んだ配列を返すようにしたので
 	// レスポンスのボディの JSON からも同じ内容の配列が返されることを期待します。
-	var result []*Plugin
+	var result []Plugin
 	assertions.Nil(json.NewDecoder(resp.Body).Decode(&result))
 	assertions.Equal(1, len(result))
-	assertions.Equal(mcPlugin, toMCPlugin(*result[0]))
+	assertions.Equal(mcPlugins[0], toMCPlugin(result[0]))
 }
 
 func TestAddPlugins(t *testing.T) {

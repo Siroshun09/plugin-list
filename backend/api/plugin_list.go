@@ -45,10 +45,10 @@ func (p *PluginList) GetPluginsByServer(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	result := make([]*Plugin, len(plugins))
+	result := make([]Plugin, len(plugins))
 	for i, plugin := range plugins {
-		converted := toPlugin(*plugin)
-		result[i] = &converted
+		converted := toPlugin(plugin)
+		result[i] = converted
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -56,7 +56,7 @@ func (p *PluginList) GetPluginsByServer(w http.ResponseWriter, r *http.Request, 
 }
 
 func (p *PluginList) AddPlugins(w http.ResponseWriter, r *http.Request, serverName string) {
-	plugins := make([]*Plugin, 0)
+	var plugins []Plugin
 
 	if err := json.NewDecoder(r.Body).Decode(&plugins); err != nil {
 		sendError(w, http.StatusBadRequest, "Invalid format for Plugin array")
@@ -66,7 +66,7 @@ func (p *PluginList) AddPlugins(w http.ResponseWriter, r *http.Request, serverNa
 	for _, plugin := range plugins {
 		plugin.ServerName = serverName
 
-		mcPlugin := toMCPlugin(*plugin)
+		mcPlugin := toMCPlugin(plugin)
 
 		if err := p.useCase.SubmitMCPlugin(r.Context(), mcPlugin); err != nil {
 			sendError(w, http.StatusInternalServerError, "Internal server error")

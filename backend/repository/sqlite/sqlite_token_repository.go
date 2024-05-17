@@ -72,7 +72,7 @@ func (t tokenRepository) RemoveToken(ctx context.Context, token string) (returnE
 	return nil
 }
 
-func (t tokenRepository) LoadTokens(ctx context.Context) (tokens []*domain.Token, returnErr error) {
+func (t tokenRepository) LoadTokens(ctx context.Context) (tokens []domain.Token, returnErr error) {
 	rows, err := t.conn.db.QueryContext(ctx, selectAllTokenQuery)
 
 	if err != nil {
@@ -86,7 +86,7 @@ func (t tokenRepository) LoadTokens(ctx context.Context) (tokens []*domain.Token
 		}
 	}(rows)
 
-	var result []*domain.Token
+	var result []domain.Token
 
 	for rows.Next() {
 		var token domain.Token
@@ -95,7 +95,7 @@ func (t tokenRepository) LoadTokens(ctx context.Context) (tokens []*domain.Token
 			return nil, err
 		}
 		token.Created = time.UnixMilli(createdAt)
-		result = append(result, &token)
+		result = append(result, token)
 	}
 
 	return result, nil

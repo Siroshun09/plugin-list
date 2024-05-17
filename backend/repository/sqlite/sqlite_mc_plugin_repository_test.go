@@ -40,7 +40,7 @@ func TestMCPluginRepository(t *testing.T) {
 	// プラグイン情報の保存テスト
 	err = repo.CreateOrUpdateMCPlugin(context.TODO(), testPlugin)
 	assertion.Nil(err)
-	checkTestPlugin(repo, &testPlugin, assertion) // 保存したプラグイン情報とサンプルが同じか検証
+	checkTestPlugin(repo, testPlugin, assertion) // 保存したプラグイン情報とサンプルが同じか検証
 
 	// プラグイン情報の更新テスト
 	testPlugin.FileName = "TestPlugin-1.1.jar"
@@ -50,7 +50,7 @@ func TestMCPluginRepository(t *testing.T) {
 	err = repo.CreateOrUpdateMCPlugin(context.TODO(), testPlugin)
 
 	assertion.Nil(err)
-	checkTestPlugin(repo, &testPlugin, assertion) // 更新したプラグイン情報とサンプルが同じか検証
+	checkTestPlugin(repo, testPlugin, assertion) // 更新したプラグイン情報とサンプルが同じか検証
 
 	// サーバーの名前一覧の取得テスト
 	// 返される配列は長さ1で、"test" が含まれる
@@ -75,7 +75,7 @@ func TestMCPluginRepository(t *testing.T) {
 
 // checkTestPlugin はリポジトリから取得した MCPlugin と与えられた MCPlugin が等しいかどうかを確認するヘルパーメソッドです。
 // このメソッドを呼び出す際、リポジトリには1つの MCPlugin のみが含まれている必要があります。
-func checkTestPlugin(repo repository.MCPluginRepository, testPlugin *domain.MCPlugin, assertion *assert.Assertions) {
+func checkTestPlugin(repo repository.MCPluginRepository, testPlugin domain.MCPlugin, assertion *assert.Assertions) {
 	plugins, err := repo.GetMCPluginsByServerName(context.TODO(), testPlugin.ServerName) // リポジトリからプラグイン一覧を取得
 
 	assertion.Nil(err)

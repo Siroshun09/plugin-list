@@ -95,7 +95,7 @@ func (m mcPluginRepository) GetMCPluginsByServerName(ctx context.Context, server
 		}
 	}(rows)
 
-	var result []*domain.MCPlugin
+	var result []domain.MCPlugin
 
 	for rows.Next() {
 		var plugin domain.MCPlugin
@@ -104,7 +104,7 @@ func (m mcPluginRepository) GetMCPluginsByServerName(ctx context.Context, server
 			return nil, err
 		}
 		plugin.LastUpdated = time.UnixMilli(unixTime)
-		result = append(result, &plugin)
+		result = append(result, plugin)
 	}
 
 	return result, nil

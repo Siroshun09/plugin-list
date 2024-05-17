@@ -43,7 +43,7 @@ func TestTokenRepository(t *testing.T) {
 
 	assertion.Nil(err)
 	assertion.Equal(1, len(tokens))
-	assertion.Equal(&token, tokens[0])
+	assertion.Equal(token, tokens[0])
 
 	// トークンの削除テスト
 	assertion.Nil(repo.RemoveToken(context.TODO(), token.Value))

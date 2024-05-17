@@ -55,10 +55,10 @@ func (mr *MockMCPluginUseCaseMockRecorder) DeleteMCPlugin(ctx, serverName, plugi
 }
 
 // GetMCPluginsByServerName mocks base method.
-func (m *MockMCPluginUseCase) GetMCPluginsByServerName(ctx context.Context, serverName string) ([]*domain.MCPlugin, error) {
+func (m *MockMCPluginUseCase) GetMCPluginsByServerName(ctx context.Context, serverName string) ([]domain.MCPlugin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMCPluginsByServerName", ctx, serverName)
-	ret0, _ := ret[0].([]*domain.MCPlugin)
+	ret0, _ := ret[0].([]domain.MCPlugin)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -13,7 +13,7 @@ type TokenRepository interface {
 	// RemoveToken は指定されたトークン文字列を削除します。
 	RemoveToken(ctx context.Context, token string) error
 	// LoadTokens は現在登録されているトークンをすべて返します。
-	LoadTokens(ctx context.Context) ([]*domain.Token, error)
+	LoadTokens(ctx context.Context) ([]domain.Token, error)
 	// ValidateToken は指定されたトークン文字列が登録されているか判定します。
 	ValidateToken(ctx context.Context, token string) (bool, error)
 }

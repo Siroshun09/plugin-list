@@ -16,7 +16,7 @@ type TokenUseCase interface {
 	// domain.Token の文字列トークンには、そのバイト列を16進数表記に変換したものを、作成時間には time.Now() が使用されます。
 	CreateNewRandomToken(ctx context.Context, length int) (*domain.Token, error)
 	// GetAllTokens は現在有効なすべてのトークンを取得します。
-	GetAllTokens(ctx context.Context) ([]*domain.Token, error)
+	GetAllTokens(ctx context.Context) ([]domain.Token, error)
 	// ValidateToken は指定されたトークンの文字列が有効かどうか判定します。
 	ValidateToken(ctx context.Context, token string) (bool, error)
 	// InvalidateToken は指定されたトークンの文字列を無効化します。
@@ -49,7 +49,7 @@ func (r tokenRepositoryUseCase) CreateNewRandomToken(ctx context.Context, length
 	return &token, nil
 }
 
-func (r tokenRepositoryUseCase) GetAllTokens(ctx context.Context) ([]*domain.Token, error) {
+func (r tokenRepositoryUseCase) GetAllTokens(ctx context.Context) ([]domain.Token, error) {
 	return r.repo.LoadTokens(ctx)
 }
 
