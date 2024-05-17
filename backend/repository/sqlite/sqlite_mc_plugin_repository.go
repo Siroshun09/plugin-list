@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/Siroshun09/plugin-list/domain"
 	"github.com/Siroshun09/plugin-list/repository"
 	"time"
@@ -54,9 +55,9 @@ func (m mcPluginRepository) CreateOrUpdateMCPlugin(_ context.Context, plugin dom
 	}
 
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			returnErr = err
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
 		}
 	}(rows)
 
@@ -71,9 +72,9 @@ func (m mcPluginRepository) DeleteMCPlugin(_ context.Context, serverName string,
 	}
 
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			returnErr = err
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
 		}
 	}(rows)
 
@@ -88,9 +89,9 @@ func (m mcPluginRepository) GetMCPluginsByServerName(_ context.Context, serverNa
 	}
 
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			returnErr = err
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
 		}
 	}(rows)
 
@@ -117,9 +118,9 @@ func (m mcPluginRepository) GetServerNames(_ context.Context) (serverNames []str
 	}
 
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			returnErr = err
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
 		}
 	}(rows)
 

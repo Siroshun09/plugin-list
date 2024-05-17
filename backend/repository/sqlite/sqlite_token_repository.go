@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/Siroshun09/plugin-list/domain"
 	"github.com/Siroshun09/plugin-list/repository"
 	"time"
@@ -45,9 +46,9 @@ func (t tokenRepository) AddToken(_ context.Context, token domain.Token) (return
 	}
 
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			returnErr = err
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
 		}
 	}(rows)
 
@@ -62,9 +63,9 @@ func (t tokenRepository) RemoveToken(_ context.Context, token string) (returnErr
 	}
 
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			returnErr = err
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
 		}
 	}(rows)
 
@@ -79,9 +80,9 @@ func (t tokenRepository) LoadTokens(_ context.Context) (tokens []*domain.Token, 
 	}
 
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			returnErr = err
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
 		}
 	}(rows)
 
@@ -108,9 +109,9 @@ func (t tokenRepository) ValidateToken(_ context.Context, token string) (valid b
 	}
 
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			returnErr = err
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
 		}
 	}(rows)
 
