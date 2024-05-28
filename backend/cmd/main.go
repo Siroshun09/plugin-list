@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"github.com/Siroshun09/plugin-list/app"
 	"github.com/Siroshun09/plugin-list/handler"
 	"github.com/Siroshun09/plugin-list/repository/sqlite"
@@ -14,6 +13,8 @@ import (
 
 func main() {
 	slog.Info("Starting plugin-list...")
+
+	app.ParseFlags()
 
 	dbPath := "./" + sqlite.DatabaseFilename
 	slog.Info("Initializing the database...", slog.String("implementation", sqlite.ImplementationName), slog.Any("db_path", dbPath))
@@ -40,9 +41,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	port := *flag.String("port", "8080", "The port to listen on")
-	slog.Info("Preparing the server...", slog.String("port", port))
-	err = a.PrepareServer(port)
+	slog.Info(
+		"Preparing the server...",
+		slog.String(app.PortFlag, app.GetPort()),
+		slog.String(app.AllowedOriginFlag+"s", app.GetAllowedOriginsAsString()),
+		slog.Bool(app.PrintUnknownOriginsFlag, app.PrintUnknownOrigins()),
+	)
+	err = a.PrepareServer(app.GetPort(), app.GetAllowedOrigins(), app.PrintUnknownOrigins())
 
 	if err != nil {
 		slog.Error("Failed to initialize the web server", err)

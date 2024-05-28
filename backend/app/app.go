@@ -58,7 +58,7 @@ func NewApp(ctx context.Context, conn sqlite.Connection) (*App, error) {
 }
 
 // PrepareServer は指定されたポート番号を使用して API サーバーを起動する準備を行います。
-func (app *App) PrepareServer(port string) error {
+func (app *App) PrepareServer(port string, origins map[string]struct{}, printUnknownOrigins bool) error {
 	// https://github.com/deepmap/oapi-codegen/blob/master/examples/petstore-expanded/chi/petstore.go
 	swagger, err := api.GetSwagger()
 
@@ -87,7 +87,16 @@ func (app *App) PrepareServer(port string) error {
 	// This is how you set up a basic chi router
 	r := chi.NewRouter()
 
-	r.Use(cors.AllowAll().Handler) // FIXME
+	r.Use(cors.Handler(cors.Options{
+		AllowOriginFunc: func(r *http.Request, origin string) bool {
+			if _, ok := origins[origin]; ok {
+				return true
+			} else if printUnknownOrigins {
+				slog.Info("Unknown Origin", slog.String("origin", origin))
+			}
+			return false
+		},
+	}))
 
 	// Use our validation middleware to check all requests against the
 	// OpenAPI schema.
