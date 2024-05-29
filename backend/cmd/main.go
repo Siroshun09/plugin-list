@@ -12,6 +12,8 @@ import (
 )
 
 func main() {
+	handler.InitConsoleLogger()
+
 	slog.Info("Starting plugin-list...")
 
 	app.ParseFlags()
