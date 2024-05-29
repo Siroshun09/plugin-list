@@ -9,7 +9,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
-import type MCPlugin from "../../providers/mcPlugin.ts";
+import type MCPlugin from "../../data/mcPlugin.ts";
 import isNonEmptyArray from "../../utils/utils.ts";
 import PluginCount from "../atoms/pluginCount.tsx";
 

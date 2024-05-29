@@ -1,28 +1,24 @@
-import type PluginListProvider from "../../providers/pluginListProvider.ts";
+import { getPluginListOfServer } from "../../api/api.ts";
 import PluginListTitle from "../atoms/pluginListTitle.tsx";
 import PluginTable from "../molecules/pluginTable.tsx";
 
 export default function PluginList(props: {
-	provider: PluginListProvider;
 	serverName: string;
 }) {
 	return (
 		<div id="sidebar" className="m-5">
 			<PluginListTitle serverName={props.serverName} />
-			{createSelectedPluginList(props.provider, props.serverName)}
+			{createSelectedPluginList(props.serverName)}
 		</div>
 	);
 }
 
-function createSelectedPluginList(
-	provider: PluginListProvider,
-	serverName: string,
-) {
+function createSelectedPluginList(serverName: string) {
 	if (serverName.length === 0) {
 		return <p className="text-2xl">⇐ Select the server from the sidebar.</p>;
 	}
 
-	const plugins = provider.getPluginList(serverName);
+	const plugins = getPluginListOfServer(serverName);
 
 	if (plugins === undefined) {
 		return (
