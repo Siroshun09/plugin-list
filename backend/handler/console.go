@@ -28,7 +28,7 @@ func args(args ...string) []string {
 func HandleConsoleInput(tokenUseCase usecase.TokenUseCase, canceller context.CancelFunc) {
 	commands := initCommandMap(tokenUseCase)
 
-	slog.Info("Type 'help' for show available commands!")
+	slog.Info("Type 'help' to show available commands!")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	printNewLine()
