@@ -1,13 +1,13 @@
-export default function PluginCount(props: { count: number }) {
+export default function PluginCount(props: { count: number; suffix: string }) {
 	switch (props.count) {
 		case 0: {
-			return decorate("No plugins installed.");
+			return decorate(`No plugins ${props.suffix}`);
 		}
 		case 1: {
-			return decorate("1 plugin installed.");
+			return decorate(`1 plugin ${props.suffix}`);
 		}
 		default: {
-			return decorate(`${props.count} plugins installed.`);
+			return decorate(`${props.count} plugins ${props.suffix}`);
 		}
 	}
 }

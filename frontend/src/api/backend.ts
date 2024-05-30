@@ -5,29 +5,31 @@
  * plugin-list API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query'
-import type {
-  MutationFunction,
-  QueryFunction,
-  QueryKey,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query'
 import axios from 'axios'
 import type {
-  AxiosError,
   AxiosRequestConfig,
   AxiosResponse
 } from 'axios'
+export type AddCustomDataKeyInfoBody = {
+  /** the description of the key */
+  description?: string;
+  /** the display name of the key */
+  display_name?: string;
+  /** the form type that is used in frontend */
+  form_type?: string;
+};
+
+export type AddPluginCustomDataBody = {[key: string]: string};
+
+/**
+ * User-defined information of this plugin
+ */
+export type GetPluginCustomData200 = {[key: string]: string};
+
 export type AddPluginBody = {
   /** File name of the plugin */
   file_name?: string;
-  /** Unix time when the plugin was last updated */
+  /** Unix time when the plugin was last updated (milliseconds) */
   last_updated?: number;
   /** Type of the plugin */
   type?: string;
@@ -38,7 +40,7 @@ export type AddPluginBody = {
 export type AddPluginsBodyItem = {
   /** File name of the plugin */
   file_name?: string;
-  /** Unix time when the plugin was last updated */
+  /** Unix time when the plugin was last updated (milliseconds) */
   last_updated?: number;
   /** Name of the plugin */
   plugin_name?: string;
@@ -49,7 +51,7 @@ export type AddPluginsBodyItem = {
 };
 
 /**
- * Access token is missing or invalid
+ * access token is missing or invalid
  */
 export type UnauthorizedErrorResponse = void;
 
@@ -60,10 +62,37 @@ export interface Error {
   message: string;
 }
 
+export type CustomDataKeyAllOf = {
+  /** the description of the key */
+  description?: string;
+  /** the display name of the key */
+  display_name?: string;
+  /** the form type that is used in frontend */
+  form_type: string;
+  /** the key */
+  key: string;
+};
+
+export type CustomDataKey = CustomDataKeyAllOf;
+
+/**
+ * User-defined information of this plugin
+ */
+export type PluginInfoAllOfCustomData = {[key: string]: string};
+
+export type PluginInfoAllOf = {
+  /** User-defined information of this plugin */
+  custom_data?: PluginInfoAllOfCustomData;
+  /** Servers that have this plugin. This also provide data sent by its server. */
+  installed_servers?: Plugin[];
+};
+
+export type PluginInfo = PluginInfoAllOf;
+
 export type PluginAllOf = {
   /** File name of the plugin */
   file_name: string;
-  /** Unix time when the plugin was last updated */
+  /** Unix time when the plugin was last updated (milliseconds) */
   last_updated: number;
   /** Name of the plugin */
   plugin_name: string;
@@ -81,294 +110,169 @@ export type Plugin = PluginAllOf;
 
 
 
-/**
+  /**
  * Get the list of servers
  * @summary Get the list of servers
  */
-export const getServerNames = (
+export const getServerNames = <TData = AxiosResponse<string[]>>(
      options?: AxiosRequestConfig
- ): Promise<AxiosResponse<string[]>> => {
-    
+ ): Promise<TData> => {
     return axios.get(
       `/servers/`,options
     );
   }
 
-
-export const getGetServerNamesQueryKey = () => {
-    return [`/servers/`] as const;
-    }
-
-    
-export const getGetServerNamesQueryOptions = <TData = Awaited<ReturnType<typeof getServerNames>>, TError = AxiosError<Error>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServerNames>>, TError, TData>>, axios?: AxiosRequestConfig}
-) => {
-
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetServerNamesQueryKey();
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getServerNames>>> = ({ signal }) => getServerNames({ signal, ...axiosOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getServerNames>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetServerNamesQueryResult = NonNullable<Awaited<ReturnType<typeof getServerNames>>>
-export type GetServerNamesQueryError = AxiosError<Error>
-
-/**
- * @summary Get the list of servers
- */
-export const useGetServerNames = <TData = Awaited<ReturnType<typeof getServerNames>>, TError = AxiosError<Error>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServerNames>>, TError, TData>>, axios?: AxiosRequestConfig}
-
-  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-
-  const queryOptions = getGetServerNamesQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
-}
-
-
-
-
 /**
  * Get the list of plugins that are installed in the specified server
  * @summary Get the list of installed plugins
  */
-export const getPluginsByServer = (
+export const getPluginsByServer = <TData = AxiosResponse<Plugin[]>>(
     serverName: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<Plugin[]>> => {
-    
+ ): Promise<TData> => {
     return axios.get(
       `/servers/${serverName}/plugins`,options
     );
   }
 
-
-export const getGetPluginsByServerQueryKey = (serverName: string,) => {
-    return [`/servers/${serverName}/plugins`] as const;
-    }
-
-    
-export const getGetPluginsByServerQueryOptions = <TData = Awaited<ReturnType<typeof getPluginsByServer>>, TError = AxiosError<Error>>(serverName: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPluginsByServer>>, TError, TData>>, axios?: AxiosRequestConfig}
-) => {
-
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetPluginsByServerQueryKey(serverName);
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPluginsByServer>>> = ({ signal }) => getPluginsByServer(serverName, { signal, ...axiosOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(serverName), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPluginsByServer>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetPluginsByServerQueryResult = NonNullable<Awaited<ReturnType<typeof getPluginsByServer>>>
-export type GetPluginsByServerQueryError = AxiosError<Error>
-
-/**
- * @summary Get the list of installed plugins
- */
-export const useGetPluginsByServer = <TData = Awaited<ReturnType<typeof getPluginsByServer>>, TError = AxiosError<Error>>(
- serverName: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPluginsByServer>>, TError, TData>>, axios?: AxiosRequestConfig}
-
-  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-
-  const queryOptions = getGetPluginsByServerQueryOptions(serverName,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
-}
-
-
-
-
 /**
  * Add or update the plugins
  * @summary Add or update the plugins
  */
-export const addPlugins = (
+export const addPlugins = <TData = AxiosResponse<void>>(
     serverName: string,
     addPluginsBodyItem: AddPluginsBodyItem[], options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    
+ ): Promise<TData> => {
     return axios.post(
       `/servers/${serverName}/plugins`,
       addPluginsBodyItem,options
     );
   }
 
-
-
-export const getAddPluginsMutationOptions = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugins>>, TError,{serverName: string;data: AddPluginsBodyItem[]}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof addPlugins>>, TError,{serverName: string;data: AddPluginsBodyItem[]}, TContext> => {
-const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addPlugins>>, {serverName: string;data: AddPluginsBodyItem[]}> = (props) => {
-          const {serverName,data} = props ?? {};
-
-          return  addPlugins(serverName,data,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddPluginsMutationResult = NonNullable<Awaited<ReturnType<typeof addPlugins>>>
-    export type AddPluginsMutationBody = AddPluginsBodyItem[]
-    export type AddPluginsMutationError = AxiosError<UnauthorizedErrorResponse | Error>
-
-    /**
- * @summary Add or update the plugins
- */
-export const useAddPlugins = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugins>>, TError,{serverName: string;data: AddPluginsBodyItem[]}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationResult<
-        Awaited<ReturnType<typeof addPlugins>>,
-        TError,
-        {serverName: string;data: AddPluginsBodyItem[]},
-        TContext
-      > => {
-
-      const mutationOptions = getAddPluginsMutationOptions(options);
-
-      return useMutation(mutationOptions);
-    }
-    
 /**
  * Add or update the plugin
  * @summary Add or update the plugin
  */
-export const addPlugin = (
+export const addPlugin = <TData = AxiosResponse<void>>(
     serverName: string,
     pluginName: string,
     addPluginBody: AddPluginBody, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    
+ ): Promise<TData> => {
     return axios.post(
       `/servers/${serverName}/plugins/${pluginName}`,
       addPluginBody,options
     );
   }
 
-
-
-export const getAddPluginMutationOptions = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;pluginName: string;data: AddPluginBody}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;pluginName: string;data: AddPluginBody}, TContext> => {
-const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addPlugin>>, {serverName: string;pluginName: string;data: AddPluginBody}> = (props) => {
-          const {serverName,pluginName,data} = props ?? {};
-
-          return  addPlugin(serverName,pluginName,data,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddPluginMutationResult = NonNullable<Awaited<ReturnType<typeof addPlugin>>>
-    export type AddPluginMutationBody = AddPluginBody
-    export type AddPluginMutationError = AxiosError<UnauthorizedErrorResponse | Error>
-
-    /**
- * @summary Add or update the plugin
- */
-export const useAddPlugin = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPlugin>>, TError,{serverName: string;pluginName: string;data: AddPluginBody}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationResult<
-        Awaited<ReturnType<typeof addPlugin>>,
-        TError,
-        {serverName: string;pluginName: string;data: AddPluginBody},
-        TContext
-      > => {
-
-      const mutationOptions = getAddPluginMutationOptions(options);
-
-      return useMutation(mutationOptions);
-    }
-    
 /**
  * Delete the specified plugin from the list
  * @summary Delete the specified plugin from the list
  */
-export const deletePlugin = (
+export const deletePlugin = <TData = AxiosResponse<void>>(
     serverName: string,
     pluginName: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    
+ ): Promise<TData> => {
     return axios.delete(
       `/servers/${serverName}/plugins/${pluginName}`,options
     );
   }
 
-
-
-export const getDeletePluginMutationOptions = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlugin>>, TError,{serverName: string;pluginName: string}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof deletePlugin>>, TError,{serverName: string;pluginName: string}, TContext> => {
-const {mutation: mutationOptions, axios: axiosOptions} = options ?? {};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePlugin>>, {serverName: string;pluginName: string}> = (props) => {
-          const {serverName,pluginName} = props ?? {};
-
-          return  deletePlugin(serverName,pluginName,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeletePluginMutationResult = NonNullable<Awaited<ReturnType<typeof deletePlugin>>>
-    
-    export type DeletePluginMutationError = AxiosError<UnauthorizedErrorResponse | Error>
-
-    /**
- * @summary Delete the specified plugin from the list
+/**
+ * Get the list of known plugins that are recoded on the database
+ * @summary Get the list of known plugins
  */
-export const useDeletePlugin = <TError = AxiosError<UnauthorizedErrorResponse | Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlugin>>, TError,{serverName: string;pluginName: string}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationResult<
-        Awaited<ReturnType<typeof deletePlugin>>,
-        TError,
-        {serverName: string;pluginName: string},
-        TContext
-      > => {
+export const getPluginNames = <TData = AxiosResponse<string[]>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/plugins/`,options
+    );
+  }
 
-      const mutationOptions = getDeletePluginMutationOptions(options);
+/**
+ * Get the detailed information of the plugin
+ * @summary Get the detailed information of the plugin
+ */
+export const getPluginInfo = <TData = AxiosResponse<PluginInfo>>(
+    pluginName: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/plugins/${pluginName}`,options
+    );
+  }
 
-      return useMutation(mutationOptions);
-    }
-    
+/**
+ * Get the custom data of the plugin
+ * @summary Get the custom data of the plugin
+ */
+export const getPluginCustomData = <TData = AxiosResponse<GetPluginCustomData200>>(
+    pluginName: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/plugins/${pluginName}/custom-data/`,options
+    );
+  }
+
+/**
+ * Add or update custom data of the plugin
+ * @summary Add or update custom data of the plugin
+ */
+export const addPluginCustomData = <TData = AxiosResponse<void>>(
+    pluginName: string,
+    addPluginCustomDataBody: AddPluginCustomDataBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/plugins/${pluginName}/custom-data/`,
+      addPluginCustomDataBody,options
+    );
+  }
+
+/**
+ * Get the custom data keys
+ * @summary Get the custom data keys
+ */
+export const getCustomDataKeys = <TData = AxiosResponse<CustomDataKey[]>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/custom_data/keys/`,options
+    );
+  }
+
+/**
+ * Get information of the custom data key
+ * @summary Get information of the custom data key
+ */
+export const getCustomDataKeyInfo = <TData = AxiosResponse<CustomDataKey>>(
+    key: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/custom_data/keys/${key}/`,options
+    );
+  }
+
+/**
+ * Add or update information of the custom data key
+ * @summary Add or update information of the custom data key
+ */
+export const addCustomDataKeyInfo = <TData = AxiosResponse<void>>(
+    key: string,
+    addCustomDataKeyInfoBody: AddCustomDataKeyInfoBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/custom_data/keys/${key}/`,
+      addCustomDataKeyInfoBody,options
+    );
+  }
+
+export type GetServerNamesResult = AxiosResponse<string[]>
+export type GetPluginsByServerResult = AxiosResponse<Plugin[]>
+export type AddPluginsResult = AxiosResponse<void>
+export type AddPluginResult = AxiosResponse<void>
+export type DeletePluginResult = AxiosResponse<void>
+export type GetPluginNamesResult = AxiosResponse<string[]>
+export type GetPluginInfoResult = AxiosResponse<PluginInfo>
+export type GetPluginCustomDataResult = AxiosResponse<GetPluginCustomData200>
+export type AddPluginCustomDataResult = AxiosResponse<void>
+export type GetCustomDataKeysResult = AxiosResponse<CustomDataKey[]>
+export type GetCustomDataKeyInfoResult = AxiosResponse<CustomDataKey>
+export type AddCustomDataKeyInfoResult = AxiosResponse<void>

@@ -1,6 +1,4 @@
 import {
-	type HeaderContext,
-	type SortDirection,
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
@@ -8,26 +6,23 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
-import isNonEmptyArray from "../../utils/utils.ts";
+import type { Plugin } from "../../api/backend.ts";
+import {
+	checkRowValueByFilter,
+	createFilterInput,
+	isNonEmptyArray,
+	makeSortableColumn,
+} from "../../utils/utils.tsx";
 import PluginCount from "../atoms/pluginCount.tsx";
-import {Plugin} from "../../api/backend.ts";
 
 export default function ServerPluginTable(props: {
 	plugins: readonly Plugin[];
 }) {
 	if (props.plugins.length === 0) {
-		return <PluginCount count={0} />;
+		return <PluginCount count={0} suffix="installed" />;
 	}
 
-	return (
-		<>
-			<div id="plugin-count" className="mb-5">
-				<PluginCount count={props.plugins.length} />
-			</div>
-			{createPluginTableIfInstalled(props.plugins)}
-		</>
-	);
+	return createPluginTableIfInstalled(props.plugins);
 }
 
 function createPluginTableIfInstalled(plugins: readonly Plugin[]) {
@@ -51,19 +46,13 @@ function createTable(plugins: [Plugin, ...Plugin[]]) {
 
 	return (
 		<>
-			<div id="name-filter">
-				<input
-					placeholder="Filter plugins by name..."
-					value={
-						(table.getColumn("plugin_name")?.getFilterValue() as string) ?? ""
-					}
-					onChange={(e) => {
-						table.getColumn("plugin_name")?.setFilterValue(e.target.value);
-					}}
-					className="flex flex-row-reverse bg-white border border-gray-400 px-1 my-1.5 right-0"
-				/>
+			<div id="count-and-name-filter" className="flex my-3">
+				<div className="my-auto">
+					<PluginCount count={plugins.length} suffix="installed" />
+				</div>
+				{createFilterInput(table.getColumn("plugin_name"))}
 			</div>
-			<table className="table-auto w-full">
+			<table className="table-fixed w-full">
 				<thead>
 					{table.getHeaderGroups().map((headerGroup) => (
 						<tr key={headerGroup.id} className="text-center bg-gray-100">
@@ -104,17 +93,8 @@ const columns = [
 	columnHelper.accessor("plugin_name", {
 		header: (ctx) => makeSortableColumn(ctx, "Name"),
 		cell: (info) => info.getValue(),
-		filterFn: (row, columnId, value) => {
-			const filters = ((value as string) ?? "")
-				.split(" ")
-				.filter((str) => str.length > 0) // Remove empty filter values
-				.map((str) => str.toLowerCase()); // Make filter values lowercase to eliminate case sensitivity.
-			const cell = row.getValue<string>(columnId).toLowerCase(); // Similarly, lowercase the cell values
-			return (
-				filters.length === 0 ||
-				filters.find((filter) => cell.indexOf(filter) !== -1) !== undefined
-			);
-		},
+		filterFn: (row, columnId, value) =>
+			checkRowValueByFilter(row, columnId, (value as string) ?? ""),
 	}),
 	columnHelper.accessor("file_name", {
 		header: "File",
@@ -122,7 +102,7 @@ const columns = [
 	}),
 	columnHelper.accessor("version", {
 		header: "Version",
-		cell: (info) => info.getValue(),
+		cell: (info) => <div className="text-center">{info.getValue()}</div>,
 	}),
 	columnHelper.accessor("last_updated", {
 		header: (ctx) => makeSortableColumn(ctx, "Last Updated"),
@@ -131,25 +111,3 @@ const columns = [
 			${new Date(info.getValue()).toLocaleTimeString()}`,
 	}),
 ];
-
-function makeSortableColumn<I, O>(ctx: HeaderContext<I, O>, name: string) {
-	return (
-		<div className="items-center justify-center">
-			<span className="mr-1">{name}</span>
-			<button onClick={ctx.column.getToggleSortingHandler()} type="button">
-				{getSortIcon(ctx.column.getIsSorted())}
-			</button>
-		</div>
-	);
-}
-
-function getSortIcon(sort: false | SortDirection) {
-	switch (sort) {
-		case "asc":
-			return <FaSortUp />;
-		case "desc":
-			return <FaSortDown />;
-		default:
-			return <FaSort />;
-	}
-}

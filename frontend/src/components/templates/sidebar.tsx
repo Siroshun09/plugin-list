@@ -1,23 +1,31 @@
-import isNonEmptyArray from "../../utils/utils.ts";
+import { useEffect, useState } from "react";
+import { getServerNames } from "../../api/backend.ts";
+import { isNonEmptyArray } from "../../utils/utils.tsx";
+import ToggleAllPluginListModeButton from "../atoms/toggleAllPluginListModeButton.tsx";
 import ServerList from "../molecules/serverList.tsx";
-import {useEffect, useState} from "react";
-import {getServerNames} from "../../api/backend.ts";
 
 export default function SideBar(props: {
 	onServerSelected: (serverName: string) => void;
+	allPluginListMode: boolean;
+	changeAllPluginListMode: (newValue: boolean) => void;
 }) {
-	const [serverList, setServerList] = useState<readonly string[]>([])
+	const [serverList, setServerList] = useState<readonly string[]>([]);
 
 	useEffect(() => {
 		(async () => {
-			setServerList((await getServerNames()).data)
-		})()
-	}, [])
+			setServerList((await getServerNames()).data);
+		})();
+	}, []);
 
 	return (
 		<div id="sidebar">
 			<h2 className="text-4xl m-5">Servers</h2>
-			{createServerListOrErrorIfEmpty(serverList, props.onServerSelected)}
+			{createServerListOrErrorIfEmpty(
+				serverList,
+				props.onServerSelected,
+				props.allPluginListMode,
+				props.changeAllPluginListMode,
+			)}
 		</div>
 	);
 }
@@ -25,9 +33,16 @@ export default function SideBar(props: {
 function createServerListOrErrorIfEmpty(
 	serverList: readonly string[],
 	onServerSelected: (serverName: string) => void,
+	allPluginListMode: boolean,
+	changeAllPluginListMode: (newValue: boolean) => void,
 ) {
 	if (isNonEmptyArray(serverList)) {
-		return createServerList(serverList, onServerSelected);
+		return createServerList(
+			serverList,
+			onServerSelected,
+			allPluginListMode,
+			changeAllPluginListMode,
+		);
 	}
 
 	return <p className="text-2xl my-3 mx-5 text-red-500">No servers found</p>;
@@ -36,6 +51,8 @@ function createServerListOrErrorIfEmpty(
 function createServerList(
 	serverList: readonly [string, ...string[]],
 	onServerSelected: (serverName: string) => void,
+	allPluginListMode: boolean,
+	changeAllPluginListMode: (newValue: boolean) => void,
 ) {
 	return (
 		<>
@@ -43,6 +60,10 @@ function createServerList(
 				Click to change the server.
 			</p>
 			<ServerList list={serverList} consumer={onServerSelected} />
+			<ToggleAllPluginListModeButton
+				current={allPluginListMode}
+				onClick={changeAllPluginListMode}
+			/>
 		</>
 	);
 }
