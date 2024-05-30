@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
-import PluginList from "./components/templates/pluginList.tsx";
+import ServerPluginList from "./components/templates/serverPluginList.tsx";
 import SideBar from "./components/templates/sidebar.tsx";
 
 function App() {
@@ -26,7 +26,7 @@ function App() {
 					/>
 				</div>
 				<div id="main" className="w-3/4">
-					<PluginList serverName={server} />
+					<ServerPluginList serverName={server} />
 				</div>
 			</div>
 		</QueryClientProvider>

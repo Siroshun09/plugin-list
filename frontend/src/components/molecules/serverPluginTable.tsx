@@ -13,7 +13,7 @@ import type MCPlugin from "../../data/mcPlugin.ts";
 import isNonEmptyArray from "../../utils/utils.ts";
 import PluginCount from "../atoms/pluginCount.tsx";
 
-export default function PluginTable(props: {
+export default function ServerPluginTable(props: {
 	plugins: readonly MCPlugin[];
 }) {
 	if (props.plugins.length === 0) {

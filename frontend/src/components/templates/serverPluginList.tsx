@@ -1,8 +1,8 @@
 import { getPluginListOfServer } from "../../api/api.ts";
 import PluginListTitle from "../atoms/pluginListTitle.tsx";
-import PluginTable from "../molecules/pluginTable.tsx";
+import ServerPluginTable from "../molecules/serverPluginTable.tsx";
 
-export default function PluginList(props: {
+export default function ServerPluginList(props: {
 	serverName: string;
 }) {
 	return (
@@ -26,5 +26,5 @@ function createSelectedPluginList(serverName: string) {
 		);
 	}
 
-	return <PluginTable plugins={plugins} />;
+	return <ServerPluginTable plugins={plugins} />;
 }
