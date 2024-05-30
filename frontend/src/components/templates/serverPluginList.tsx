@@ -1,24 +1,33 @@
-import { getPluginListOfServer } from "../../api/api.ts";
 import PluginListTitle from "../atoms/pluginListTitle.tsx";
 import ServerPluginTable from "../molecules/serverPluginTable.tsx";
+import React, {useEffect, useState} from "react";
+import {getPluginsByServer} from "../../api/backend.ts";
 
 export default function ServerPluginList(props: {
 	serverName: string;
 }) {
+	const [pluginList, setPluginList] = useState<React.JSX.Element>()
+
+	useEffect(() => {
+		(async () => {
+			setPluginList(await createSelectedPluginList(props.serverName))
+		})()
+	}, [props.serverName])
+
 	return (
 		<div id="sidebar" className="m-5">
-			<PluginListTitle serverName={props.serverName} />
-			{createSelectedPluginList(props.serverName)}
+			<PluginListTitle serverName={props.serverName}/>
+			{pluginList}
 		</div>
 	);
 }
 
-function createSelectedPluginList(serverName: string) {
+async function createSelectedPluginList(serverName: string) {
 	if (serverName.length === 0) {
 		return <p className="text-2xl">⇐ Select the server from the sidebar.</p>;
 	}
 
-	const plugins = getPluginListOfServer(serverName);
+	const plugins = (await getPluginsByServer(serverName)).data
 
 	if (plugins === undefined) {
 		return (
@@ -26,5 +35,5 @@ function createSelectedPluginList(serverName: string) {
 		);
 	}
 
-	return <ServerPluginTable plugins={plugins} />;
+	return <ServerPluginTable plugins={plugins}/>;
 }

@@ -1,22 +1,31 @@
-import { getServerList } from "../../api/api.ts";
 import isNonEmptyArray from "../../utils/utils.ts";
 import ServerList from "../molecules/serverList.tsx";
+import {useEffect, useState} from "react";
+import {getServerNames} from "../../api/backend.ts";
 
 export default function SideBar(props: {
 	onServerSelected: (serverName: string) => void;
 }) {
+	const [serverList, setServerList] = useState<readonly string[]>([])
+
+	useEffect(() => {
+		(async () => {
+			setServerList((await getServerNames()).data)
+		})()
+	}, [])
+
 	return (
 		<div id="sidebar">
 			<h2 className="text-4xl m-5">Servers</h2>
-			{createServerListOrErrorIfEmpty(props.onServerSelected)}
+			{createServerListOrErrorIfEmpty(serverList, props.onServerSelected)}
 		</div>
 	);
 }
 
 function createServerListOrErrorIfEmpty(
+	serverList: readonly string[],
 	onServerSelected: (serverName: string) => void,
 ) {
-	const serverList = getServerList();
 	if (isNonEmptyArray(serverList)) {
 		return createServerList(serverList, onServerSelected);
 	}

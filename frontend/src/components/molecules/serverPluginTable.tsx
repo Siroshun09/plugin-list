@@ -9,12 +9,12 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
-import type MCPlugin from "../../data/mcPlugin.ts";
 import isNonEmptyArray from "../../utils/utils.ts";
 import PluginCount from "../atoms/pluginCount.tsx";
+import {Plugin} from "../../api/backend.ts";
 
 export default function ServerPluginTable(props: {
-	plugins: readonly MCPlugin[];
+	plugins: readonly Plugin[];
 }) {
 	if (props.plugins.length === 0) {
 		return <PluginCount count={0} />;
@@ -30,14 +30,14 @@ export default function ServerPluginTable(props: {
 	);
 }
 
-function createPluginTableIfInstalled(plugins: readonly MCPlugin[]) {
+function createPluginTableIfInstalled(plugins: readonly Plugin[]) {
 	if (isNonEmptyArray(plugins)) {
 		return createTable(plugins);
 	}
 	return undefined;
 }
 
-function createTable(plugins: [MCPlugin, ...MCPlugin[]]) {
+function createTable(plugins: [Plugin, ...Plugin[]]) {
 	const table = useReactTable({
 		data: plugins,
 		columns,
@@ -45,7 +45,7 @@ function createTable(plugins: [MCPlugin, ...MCPlugin[]]) {
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		initialState: {
-			sorting: [{ id: "pluginName", desc: false }],
+			sorting: [{ id: "plugin_name", desc: false }],
 		},
 	});
 
@@ -55,10 +55,10 @@ function createTable(plugins: [MCPlugin, ...MCPlugin[]]) {
 				<input
 					placeholder="Filter plugins by name..."
 					value={
-						(table.getColumn("pluginName")?.getFilterValue() as string) ?? ""
+						(table.getColumn("plugin_name")?.getFilterValue() as string) ?? ""
 					}
 					onChange={(e) => {
-						table.getColumn("pluginName")?.setFilterValue(e.target.value);
+						table.getColumn("plugin_name")?.setFilterValue(e.target.value);
 					}}
 					className="flex flex-row-reverse bg-white border border-gray-400 px-1 my-1.5 right-0"
 				/>
@@ -99,9 +99,9 @@ function createTable(plugins: [MCPlugin, ...MCPlugin[]]) {
 	);
 }
 
-const columnHelper = createColumnHelper<MCPlugin>();
+const columnHelper = createColumnHelper<Plugin>();
 const columns = [
-	columnHelper.accessor("pluginName", {
+	columnHelper.accessor("plugin_name", {
 		header: (ctx) => makeSortableColumn(ctx, "Name"),
 		cell: (info) => info.getValue(),
 		filterFn: (row, columnId, value) => {
@@ -116,7 +116,7 @@ const columns = [
 			);
 		},
 	}),
-	columnHelper.accessor("fileName", {
+	columnHelper.accessor("file_name", {
 		header: "File",
 		cell: (info) => info.getValue(),
 	}),
@@ -124,11 +124,11 @@ const columns = [
 		header: "Version",
 		cell: (info) => info.getValue(),
 	}),
-	columnHelper.accessor("lastUpdated", {
+	columnHelper.accessor("last_updated", {
 		header: (ctx) => makeSortableColumn(ctx, "Last Updated"),
 		cell: (info) =>
-			`${info.getValue().toLocaleDateString()}
-			${info.getValue().toLocaleTimeString()}`,
+			`${new Date(info.getValue()).toLocaleDateString()}
+			${new Date(info.getValue()).toLocaleTimeString()}`,
 	}),
 ];
 
