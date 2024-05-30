@@ -37,6 +37,10 @@ const (
 	selectMCPluginsByServerNameQuery = "SELECT * FROM mc_plugins WHERE server_name=?"
 
 	selectServerNamesQuery = "SELECT DISTINCT server_name FROM mc_plugins"
+
+	selectPluginNamesQuery = "SELECT DISTINCT plugin_name FROM mc_plugins"
+
+	selectMCPluginsByPluginNameQuery = "SELECT * FROM mc_plugins WHERE plugin_name = ?"
 )
 
 func (c *sqliteConnection) NewMCPluginRepository(ctx context.Context) (repository.MCPluginRepository, error) {
@@ -132,6 +136,62 @@ func (m mcPluginRepository) GetServerNames(ctx context.Context) (serverNames []s
 			return nil, err
 		}
 		result = append(result, serverName)
+	}
+
+	return result, nil
+}
+
+func (m mcPluginRepository) GetPluginNames(ctx context.Context) (pluginNames []string, returnErr error) {
+	rows, err := m.conn.db.QueryContext(ctx, selectPluginNamesQuery)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(rows *sql.Rows) {
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
+		}
+	}(rows)
+
+	var result []string
+
+	for rows.Next() {
+		var serverName string
+		if err := rows.Scan(&serverName); err != nil {
+			return nil, err
+		}
+		result = append(result, serverName)
+	}
+
+	return result, nil
+}
+
+func (m mcPluginRepository) GetInstalledPluginInfo(ctx context.Context, pluginName string) (plugins []domain.MCPlugin, returnErr error) {
+	rows, err := m.conn.db.QueryContext(ctx, selectMCPluginsByPluginNameQuery, pluginName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(rows *sql.Rows) {
+		closeErr := rows.Close()
+		if closeErr != nil {
+			returnErr = errors.Join(err, closeErr)
+		}
+	}(rows)
+
+	var result []domain.MCPlugin
+
+	for rows.Next() {
+		var plugin domain.MCPlugin
+		var unixTime int64
+		if err := rows.Scan(&plugin.PluginName, &plugin.ServerName, &plugin.FileName, &plugin.Version, &plugin.Type, &unixTime); err != nil {
+			return nil, err
+		}
+		plugin.LastUpdated = time.UnixMilli(unixTime)
+		result = append(result, plugin)
 	}
 
 	return result, nil

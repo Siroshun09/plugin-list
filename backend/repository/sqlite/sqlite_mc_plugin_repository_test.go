@@ -83,4 +83,16 @@ func checkTestPlugin(repo repository.MCPluginRepository, testPlugin domain.MCPlu
 	// 返されるプラグインの配列は長さ1で、引数のプラグインと同等のものが含まれる
 	assertion.Equal(1, len(plugins))
 	assertion.Equal(testPlugin, plugins[0])
+
+	// GetPluginNames で、与えられたプラグインの名前のみが含まれているか確認する
+	pluginNames, err := repo.GetPluginNames(context.Background())
+	assertion.Nil(err)
+	assertion.Equal(1, len(pluginNames))
+	assertion.Equal(testPlugin.PluginName, pluginNames[0])
+
+	// GetInstalledPluginInfo で、与えられた MCPlugin のみが含まれているか確認する
+	installInfo, err := repo.GetInstalledPluginInfo(context.Background(), testPlugin.PluginName)
+	assertion.Nil(err)
+	assertion.Equal(1, len(installInfo))
+	assertion.Equal(testPlugin, installInfo[0])
 }

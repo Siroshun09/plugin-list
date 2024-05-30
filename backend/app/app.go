@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/Siroshun09/plugin-list/api"
+	"github.com/Siroshun09/plugin-list/domain"
 	"github.com/Siroshun09/plugin-list/repository/sqlite"
 	"github.com/Siroshun09/plugin-list/usecase"
 	"github.com/getkin/kin-openapi/openapi3filter"
@@ -22,6 +23,8 @@ import (
 type App struct {
 	// domain.MCPlugin を取得・保存・削除するための usecase.MCPluginUseCase
 	McPluginUseCase usecase.MCPluginUseCase
+	// domain.CustomDataKey および domain.PluginCustomData を取得・保存・削除するための usecase.CustomDataUseCase
+	CustomDataUseCase usecase.CustomDataUseCase
 	// domain.Token を取得するための usecase.TokenUseCase
 	TokenUseCase usecase.TokenUseCase
 	// http.Server インスタンス
@@ -44,6 +47,28 @@ func NewApp(ctx context.Context, conn sqlite.Connection) (*App, error) {
 		os.Exit(1)
 	}
 
+	customDataRepo, err := conn.NewCustomDataRepository(ctx)
+
+	if err != nil {
+		slog.Error("Failed to initialize the repository for custom data", err)
+		os.Exit(1)
+	}
+
+	// 現段階では、フロントエンドで自由に CustomDataKey を追加する機能は実装しないため、いくつかデフォルトで追加しておく
+	slog.Info("Adding some custom data keys to the repository...")
+
+	err = customDataRepo.AddOrUpdateKey(ctx, domain.CustomDataKey{Key: "description", DisplayName: "Description", Description: "Description about the plugin", FormType: "LONG_TEXT"})
+	if err != nil {
+		slog.Error("Failed to add 'description' data key", err)
+		os.Exit(1)
+	}
+
+	err = customDataRepo.AddOrUpdateKey(ctx, domain.CustomDataKey{Key: "url", DisplayName: "URL", Description: "The url where the plugin is maintained", FormType: "SHORT_TEXT"})
+	if err != nil {
+		slog.Error("Failed to add 'url' data key", err)
+		os.Exit(1)
+	}
+
 	tokenRepo, err := conn.NewTokenRepository(ctx)
 
 	if err != nil {
@@ -52,9 +77,10 @@ func NewApp(ctx context.Context, conn sqlite.Connection) (*App, error) {
 	}
 
 	mcPluginUseCase := usecase.NewMCPluginUseCase(mcPluginRepo)
+	customDataUseCase := usecase.NewCustomDataUseCase(customDataRepo)
 	tokenUseCase := usecase.NewTokenUseCase(tokenRepo)
 
-	return &App{mcPluginUseCase, tokenUseCase, nil}, nil
+	return &App{mcPluginUseCase, customDataUseCase, tokenUseCase, nil}, nil
 }
 
 // PrepareServer は指定されたポート番号を使用して API サーバーを起動する準備を行います。
@@ -71,7 +97,7 @@ func (app *App) PrepareServer(port string, origins map[string]struct{}, printUnk
 	swagger.Servers = nil
 
 	// Create an instance of our handler which satisfies the generated interface
-	pluginList := api.NewPluginList(app.McPluginUseCase)
+	pluginList := api.NewPluginList(app.McPluginUseCase, app.CustomDataUseCase)
 
 	validatorOpts := &middleware.Options{}
 

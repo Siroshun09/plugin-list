@@ -15,4 +15,8 @@ type MCPluginRepository interface {
 	GetMCPluginsByServerName(ctx context.Context, serverName string) ([]domain.MCPlugin, error)
 	// GetServerNames は記録されているプラグインのサーバー名をすべて取得します。
 	GetServerNames(ctx context.Context) ([]string, error)
+	// GetPluginNames は記録されているプラグイン名をすべて返します。
+	GetPluginNames(ctx context.Context) ([]string, error)
+	// GetInstalledPluginInfo は指定されたプラグイン名の情報をすべて返します
+	GetInstalledPluginInfo(ctx context.Context, pluginName string) ([]domain.MCPlugin, error)
 }

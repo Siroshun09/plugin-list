@@ -16,6 +16,10 @@ type MCPluginUseCase interface {
 	SubmitMCPlugin(ctx context.Context, plugin domain.MCPlugin) error
 	// GetServerNames は記録されているプラグインのサーバー名をすべて取得します。
 	GetServerNames(ctx context.Context) ([]string, error)
+	// GetPluginNames は記録されているプラグイン名をすべて返します。
+	GetPluginNames(ctx context.Context) ([]string, error)
+	// GetInstalledPluginInfo は指定されたプラグイン名の情報をすべて返します
+	GetInstalledPluginInfo(ctx context.Context, pluginName string) ([]domain.MCPlugin, error)
 }
 
 // NewMCPluginUseCase は repository.MCPluginRepository を使用した新しい MCPluginUseCase を作成します。
@@ -41,4 +45,12 @@ func (r repositoryUseCase) SubmitMCPlugin(ctx context.Context, plugin domain.MCP
 
 func (r repositoryUseCase) GetServerNames(ctx context.Context) ([]string, error) {
 	return r.repo.GetServerNames(ctx)
+}
+
+func (r repositoryUseCase) GetPluginNames(ctx context.Context) ([]string, error) {
+	return r.repo.GetPluginNames(ctx)
+}
+
+func (r repositoryUseCase) GetInstalledPluginInfo(ctx context.Context, pluginName string) ([]domain.MCPlugin, error) {
+	return r.repo.GetInstalledPluginInfo(ctx, pluginName)
 }

@@ -54,6 +54,21 @@ func (mr *MockMCPluginUseCaseMockRecorder) DeleteMCPlugin(ctx, serverName, plugi
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMCPlugin", reflect.TypeOf((*MockMCPluginUseCase)(nil).DeleteMCPlugin), ctx, serverName, pluginName)
 }
 
+// GetInstalledPluginInfo mocks base method.
+func (m *MockMCPluginUseCase) GetInstalledPluginInfo(ctx context.Context, pluginName string) ([]domain.MCPlugin, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetInstalledPluginInfo", ctx, pluginName)
+	ret0, _ := ret[0].([]domain.MCPlugin)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetInstalledPluginInfo indicates an expected call of GetInstalledPluginInfo.
+func (mr *MockMCPluginUseCaseMockRecorder) GetInstalledPluginInfo(ctx, pluginName any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInstalledPluginInfo", reflect.TypeOf((*MockMCPluginUseCase)(nil).GetInstalledPluginInfo), ctx, pluginName)
+}
+
 // GetMCPluginsByServerName mocks base method.
 func (m *MockMCPluginUseCase) GetMCPluginsByServerName(ctx context.Context, serverName string) ([]domain.MCPlugin, error) {
 	m.ctrl.T.Helper()
@@ -67,6 +82,21 @@ func (m *MockMCPluginUseCase) GetMCPluginsByServerName(ctx context.Context, serv
 func (mr *MockMCPluginUseCaseMockRecorder) GetMCPluginsByServerName(ctx, serverName any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMCPluginsByServerName", reflect.TypeOf((*MockMCPluginUseCase)(nil).GetMCPluginsByServerName), ctx, serverName)
+}
+
+// GetPluginNames mocks base method.
+func (m *MockMCPluginUseCase) GetPluginNames(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPluginNames", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPluginNames indicates an expected call of GetPluginNames.
+func (mr *MockMCPluginUseCaseMockRecorder) GetPluginNames(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPluginNames", reflect.TypeOf((*MockMCPluginUseCase)(nil).GetPluginNames), ctx)
 }
 
 // GetServerNames mocks base method.

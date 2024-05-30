@@ -22,6 +22,8 @@ type Connection interface {
 	NewMCPluginRepository(ctx context.Context) (repository.MCPluginRepository, error)
 	// NewTokenRepository はこの接続を使用した repository.TokenRepository を作成します。
 	NewTokenRepository(ctx context.Context) (repository.TokenRepository, error)
+	// NewCustomDataRepository はこの接続を使用した repository.CustomDataRepository を作成します。
+	NewCustomDataRepository(ctx context.Context) (repository.CustomDataRepository, error)
 }
 
 type sqliteConnection struct {

@@ -23,6 +23,21 @@ const (
 	TokenScopes = "Token.Scopes"
 )
 
+// CustomDataKey defines model for CustomDataKey.
+type CustomDataKey struct {
+	// Description the description of the key
+	Description *string `json:"description,omitempty"`
+
+	// DisplayName the display name of the key
+	DisplayName *string `json:"display_name,omitempty"`
+
+	// FormType the form type that is used in frontend
+	FormType string `json:"form_type"`
+
+	// Key the key
+	Key string `json:"key"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	// Code Error code
@@ -52,6 +67,30 @@ type Plugin struct {
 	// Version Version of the plugin
 	Version string `json:"version"`
 }
+
+// PluginInfo defines model for PluginInfo.
+type PluginInfo struct {
+	// CustomData User-defined information of this plugin
+	CustomData *map[string]string `json:"custom_data,omitempty"`
+
+	// InstalledServers Servers that have this plugin. This also provide data sent by its server.
+	InstalledServers *[]Plugin `json:"installed_servers,omitempty"`
+}
+
+// AddCustomDataKeyInfoJSONBody defines parameters for AddCustomDataKeyInfo.
+type AddCustomDataKeyInfoJSONBody struct {
+	// Description the description of the key
+	Description *string `json:"description,omitempty"`
+
+	// DisplayName the display name of the key
+	DisplayName *string `json:"display_name,omitempty"`
+
+	// FormType the form type that is used in frontend
+	FormType *string `json:"form_type,omitempty"`
+}
+
+// AddPluginCustomDataJSONBody defines parameters for AddPluginCustomData.
+type AddPluginCustomDataJSONBody map[string]string
 
 // AddPluginsJSONBody defines parameters for AddPlugins.
 type AddPluginsJSONBody = []struct {
@@ -86,6 +125,12 @@ type AddPluginJSONBody struct {
 	Version *string `json:"version,omitempty"`
 }
 
+// AddCustomDataKeyInfoJSONRequestBody defines body for AddCustomDataKeyInfo for application/json ContentType.
+type AddCustomDataKeyInfoJSONRequestBody AddCustomDataKeyInfoJSONBody
+
+// AddPluginCustomDataJSONRequestBody defines body for AddPluginCustomData for application/json ContentType.
+type AddPluginCustomDataJSONRequestBody AddPluginCustomDataJSONBody
+
 // AddPluginsJSONRequestBody defines body for AddPlugins for application/json ContentType.
 type AddPluginsJSONRequestBody = AddPluginsJSONBody
 
@@ -94,6 +139,27 @@ type AddPluginJSONRequestBody AddPluginJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get the custom data keys
+	// (GET /custom_data/keys/)
+	GetCustomDataKeys(w http.ResponseWriter, r *http.Request)
+	// Get information of the custom data key
+	// (GET /custom_data/keys/{key}/)
+	GetCustomDataKeyInfo(w http.ResponseWriter, r *http.Request, key string)
+	// Add or update information of the custom data key
+	// (POST /custom_data/keys/{key}/)
+	AddCustomDataKeyInfo(w http.ResponseWriter, r *http.Request, key string)
+	// Get the list of known plugins
+	// (GET /plugins/)
+	GetPluginNames(w http.ResponseWriter, r *http.Request)
+	// Get the detailed information of the plugin
+	// (GET /plugins/{plugin_name})
+	GetPluginInfo(w http.ResponseWriter, r *http.Request, pluginName string)
+	// Get the custom data of the plugin
+	// (GET /plugins/{plugin_name}/custom-data/)
+	GetPluginCustomData(w http.ResponseWriter, r *http.Request, pluginName string)
+	// Add or update custom data of the plugin
+	// (POST /plugins/{plugin_name}/custom-data/)
+	AddPluginCustomData(w http.ResponseWriter, r *http.Request, pluginName string)
 	// Get the list of servers
 	// (GET /servers/)
 	GetServerNames(w http.ResponseWriter, r *http.Request)
@@ -114,6 +180,48 @@ type ServerInterface interface {
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
+
+// Get the custom data keys
+// (GET /custom_data/keys/)
+func (_ Unimplemented) GetCustomDataKeys(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get information of the custom data key
+// (GET /custom_data/keys/{key}/)
+func (_ Unimplemented) GetCustomDataKeyInfo(w http.ResponseWriter, r *http.Request, key string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Add or update information of the custom data key
+// (POST /custom_data/keys/{key}/)
+func (_ Unimplemented) AddCustomDataKeyInfo(w http.ResponseWriter, r *http.Request, key string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get the list of known plugins
+// (GET /plugins/)
+func (_ Unimplemented) GetPluginNames(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get the detailed information of the plugin
+// (GET /plugins/{plugin_name})
+func (_ Unimplemented) GetPluginInfo(w http.ResponseWriter, r *http.Request, pluginName string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get the custom data of the plugin
+// (GET /plugins/{plugin_name}/custom-data/)
+func (_ Unimplemented) GetPluginCustomData(w http.ResponseWriter, r *http.Request, pluginName string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Add or update custom data of the plugin
+// (POST /plugins/{plugin_name}/custom-data/)
+func (_ Unimplemented) AddPluginCustomData(w http.ResponseWriter, r *http.Request, pluginName string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
 
 // Get the list of servers
 // (GET /servers/)
@@ -153,6 +261,166 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// GetCustomDataKeys operation middleware
+func (siw *ServerInterfaceWrapper) GetCustomDataKeys(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCustomDataKeys(w, r)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetCustomDataKeyInfo operation middleware
+func (siw *ServerInterfaceWrapper) GetCustomDataKeyInfo(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "key" -------------
+	var key string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCustomDataKeyInfo(w, r, key)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AddCustomDataKeyInfo operation middleware
+func (siw *ServerInterfaceWrapper) AddCustomDataKeyInfo(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "key" -------------
+	var key string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddCustomDataKeyInfo(w, r, key)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetPluginNames operation middleware
+func (siw *ServerInterfaceWrapper) GetPluginNames(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPluginNames(w, r)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetPluginInfo operation middleware
+func (siw *ServerInterfaceWrapper) GetPluginInfo(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "plugin_name" -------------
+	var pluginName string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "plugin_name", chi.URLParam(r, "plugin_name"), &pluginName, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "plugin_name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPluginInfo(w, r, pluginName)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetPluginCustomData operation middleware
+func (siw *ServerInterfaceWrapper) GetPluginCustomData(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "plugin_name" -------------
+	var pluginName string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "plugin_name", chi.URLParam(r, "plugin_name"), &pluginName, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "plugin_name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPluginCustomData(w, r, pluginName)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AddPluginCustomData operation middleware
+func (siw *ServerInterfaceWrapper) AddPluginCustomData(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "plugin_name" -------------
+	var pluginName string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "plugin_name", chi.URLParam(r, "plugin_name"), &pluginName, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "plugin_name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddPluginCustomData(w, r, pluginName)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
 
 // GetServerNames operation middleware
 func (siw *ServerInterfaceWrapper) GetServerNames(w http.ResponseWriter, r *http.Request) {
@@ -411,6 +679,27 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/custom_data/keys/", wrapper.GetCustomDataKeys)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/custom_data/keys/{key}/", wrapper.GetCustomDataKeyInfo)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/custom_data/keys/{key}/", wrapper.AddCustomDataKeyInfo)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/plugins/", wrapper.GetPluginNames)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/plugins/{plugin_name}", wrapper.GetPluginInfo)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/plugins/{plugin_name}/custom-data/", wrapper.GetPluginCustomData)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/plugins/{plugin_name}/custom-data/", wrapper.AddPluginCustomData)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/servers/", wrapper.GetServerNames)
 	})
 	r.Group(func(r chi.Router) {
@@ -432,24 +721,34 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -34,7 +34,7 @@ func TestGetPluginsByServer(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mockUsecase.NewMockMCPluginUseCase(ctrl)
-	plList := NewPluginList(m)
+	plList := NewPluginList(m, mockUsecase.NewMockCustomDataUseCase(ctrl))
 
 	mcPlugins := make([]domain.MCPlugin, 1)
 	mcPlugins[0] = createTestMCPlugin()
@@ -67,7 +67,7 @@ func TestAddPlugins(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mockUsecase.NewMockMCPluginUseCase(ctrl)
-	plList := NewPluginList(m)
+	plList := NewPluginList(m, mockUsecase.NewMockCustomDataUseCase(ctrl))
 	mcPlugin := toMCPlugin(plugin)
 
 	m.EXPECT().SubmitMCPlugin(gomock.Any(), mcPlugin).Return(nil) // MCPluginUseCase.SubmitMCPlugin が TestPlugin を引数として呼び出されることを期待します
@@ -93,7 +93,7 @@ func TestAddPlugin(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mockUsecase.NewMockMCPluginUseCase(ctrl)
-	plList := NewPluginList(m)
+	plList := NewPluginList(m, mockUsecase.NewMockCustomDataUseCase(ctrl))
 	mcPlugin := toMCPlugin(plugin)
 
 	m.EXPECT().SubmitMCPlugin(gomock.Any(), mcPlugin).Return(nil) // MCPluginUseCase.SubmitMCPlugin が TestPlugin を引数として呼び出されることを期待します
@@ -116,7 +116,7 @@ func TestRemovePlugin(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mockUsecase.NewMockMCPluginUseCase(ctrl)
-	plList := NewPluginList(m)
+	plList := NewPluginList(m, mockUsecase.NewMockCustomDataUseCase(ctrl))
 
 	// MCPluginUseCase.DeleteMCPlugin はサーバー名 test, プラグイン名 TestPlugin で呼び出されることが期待されます
 	m.EXPECT().DeleteMCPlugin(gomock.Any(), "test", "TestPlugin").Return(nil)
@@ -136,7 +136,7 @@ func TestGetServerNames(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mockUsecase.NewMockMCPluginUseCase(ctrl)
-	plList := NewPluginList(m)
+	plList := NewPluginList(m, mockUsecase.NewMockCustomDataUseCase(ctrl))
 
 	serverNames := []string{"test_1", "test_2"}
 	m.EXPECT().GetServerNames(gomock.Any()).Return(serverNames, nil)
