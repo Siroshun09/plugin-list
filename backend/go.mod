@@ -1,6 +1,6 @@
 module github.com/Siroshun09/plugin-list
 
-go 1.22.2
+go 1.22.3
 
 // v0.124.0 of kin-openapi introduces compilation errors: https://github.com/deepmap/oapi-codegen/issues/1533
 replace github.com/getkin/kin-openapi => github.com/getkin/kin-openapi v0.123.0
