@@ -1,11 +1,32 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: plugin-list API
   description: plugin-list API
   version: 1.0.0
 
 paths:
-  /plugins/{server_name}:
+  /servers/:
+    get:
+      summary: Get the list of servers
+      description: Get the list of servers
+      operationId: getServerNames
+      responses:
+        '200':
+          description: the list of servers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: [ "test_server_1", "test_server_2" ]
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /servers/{server_name}/plugins:
     get:
       summary: Get the list of installed plugins
       description: Get the list of plugins that are installed in the specified server
@@ -17,6 +38,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "test_server_1"
       responses:
         '200':
           description: the list of plugins that are installed in the specified server
@@ -33,9 +55,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
-      summary: Add or update the plugin
-      description: Add or update the plugin
-      operationId: addPlugin
+      summary: Add or update the plugins
+      description: Add or update the plugins
+      operationId: addPlugins
+      security:
+        - Token: [ ]
       parameters:
         - name: server_name
           in: path
@@ -43,31 +67,125 @@ paths:
           required: true
           schema:
             type: string
+          example: "test_server_1"
       requestBody:
-        description: Plugin to add to the list
+        description: Plugins to add or update
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Plugin'
+              type: array
+              items:
+                type: object
+                properties:
+                  plugin_name:
+                    type: string
+                    description: Name of the plugin
+                    example: "TestPlugin"
+                  file_name:
+                    type: string
+                    description: File name of the plugin
+                    example: "TestPlugin-1.0.jar"
+                  version:
+                    type: string
+                    description: Version of the plugin
+                    example: "1.0"
+                  type:
+                    type: string
+                    description: Type of the plugin
+                    example: "bukkit_plugin"
+                  last_updated:
+                    type: integer
+                    format: int64
+                    description: Unix time when the plugin was last updated (milliseconds)
+                    example: 1715817600000
+                required:
+                  - plugin_name
+                  - server_name
+                  - file_name
+                  - version
+                  - type
+                  - last_updated
       responses:
-        '200':
-          description: plugin response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Plugin'
+        '201':
+          description: success
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /plugins/{server_name}/{plugin_name}:
+  /servers/{server_name}/plugins/{plugin_name}:
+    post:
+      summary: Add or update the plugin
+      description: Add or update the plugin
+      operationId: addPlugin
+      security:
+        - Token: [ ]
+      parameters:
+        - name: server_name
+          in: path
+          description: the server name to get plugins
+          required: true
+          schema:
+            type: string
+          example: "test_server_1"
+        - name: plugin_name
+          in: path
+          description: the plugin name to get information of the plugin
+          required: true
+          schema:
+            type: string
+          example: "TestPlugin"
+      requestBody:
+        description: A new plugin data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                  description: File name of the plugin
+                  example: "TestPlugin-1.0.jar"
+                version:
+                  type: string
+                  description: Version of the plugin
+                  example: "1.0"
+                type:
+                  type: string
+                  description: Type of the plugin
+                  example: "bukkit_plugin"
+                last_updated:
+                  type: integer
+                  format: int64
+                  description: Unix time when the plugin was last updated (milliseconds)
+                  example: 1715817600000
+              required:
+                - file_name
+                - version
+                - type
+                - last_updated
+      responses:
+        '201':
+          description: success
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     delete:
       summary: Delete the specified plugin from the list
       description: Delete the specified plugin from the list
       operationId: deletePlugin
+      security:
+        - Token: [ ]
       parameters:
         - name: server_name
           in: path
@@ -75,36 +193,226 @@ paths:
           required: true
           schema:
             type: string
+          example: "test_server_1"
         - name: plugin_name
           in: path
           description: the plugin name to get information of the plugin
           required: true
           schema:
             type: string
+          example: "TestPlugin"
       responses:
         '204':
           description: plugin deleted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /servers/:
+  /plugins/:
     get:
-      summary: Get the list of servers
-      description: Get the list of servers
-      operationId: getServerNames
+      summary: Get the list of known plugins
+      description: Get the list of known plugins that are recoded on the database
+      operationId: getPluginNames
       responses:
         '200':
-          description: the list of servers
+          description: the list of known plugins
           content:
             application/json:
               schema:
                 type: array
                 items:
                   type: string
-                example: ["test_1", "test_2"]
+                example: [ "TestPlugin1", "TestPlugin2" ]
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /plugins/{plugin_name}:
+    get:
+      summary: Get the detailed information of the plugin
+      description: Get the detailed information of the plugin
+      operationId: getPluginInfo
+      parameters:
+        - name: plugin_name
+          in: path
+          description: the plugin name to get information of the plugin
+          required: true
+          schema:
+            type: string
+          example: "TestPlugin"
+      responses:
+        '200':
+          description: the detailed information of the plugin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginInfo'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /plugins/{plugin_name}/custom-data/:
+    get:
+      summary: Get the custom data of the plugin
+      description: Get the custom data of the plugin
+      operationId: getPluginCustomData
+      parameters:
+        - name: plugin_name
+          in: path
+          description: the plugin name to get the custom data of the plugin
+          required: true
+          schema:
+            type: string
+          example: "TestPlugin"
+      responses:
+        '200':
+          description: the custom data of the plugin
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {
+                  description: "This is a plugin for testing",
+                  url: "https://example.com/test_plugin"
+                }
+                description: User-defined information of this plugin
+                additionalProperties:
+                  type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Add or update custom data of the plugin
+      description: Add or update custom data of the plugin
+      operationId: addPluginCustomData
+      parameters:
+        - name: plugin_name
+          in: path
+          description: the plugin name to add or update custom data of the plugin
+          required: true
+          schema:
+            type: string
+          example: "TestPlugin"
+      requestBody:
+        description: New custom data of the plugin
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example: {
+                description: "This is a plugin for testing",
+                url: "https://example.com/test_plugin"
+              }
+              additionalProperties:
+                type: string
+      responses:
+        '201':
+          description: success
+        '422':
+          description: when the request body has unknown key
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "unknown_key"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /custom_data/keys/:
+    get:
+      summary: Get the custom data keys
+      description: Get the custom data keys
+      operationId: getCustomDataKeys
+      responses:
+        '200':
+          description: the custom data keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomDataKey'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /custom_data/keys/{key}/:
+    get:
+      summary: Get information of the custom data key
+      description: Get information of the custom data key
+      operationId: getCustomDataKeyInfo
+      parameters:
+        - name: key
+          in: path
+          description: the custom data key
+          required: true
+          schema:
+            type: string
+          example: "url"
+      responses:
+        '200':
+          description: the custom data keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDataKey'
+        '404':
+          description: key not found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Add or update information of the custom data key
+      description: Add or update information of the custom data key
+      operationId: addCustomDataKeyInfo
+      parameters:
+        - name: key
+          in: path
+          description: the custom data key
+          required: true
+          schema:
+            type: string
+          example: "url"
+      requestBody:
+        description: New information of the custom data key
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name:
+                  type: string
+                  description: the display name of the key
+                description:
+                  type: string
+                  description: the description of the key
+                form_type:
+                  type: string
+                  description: the form type that is used in frontend (If not specified, this value will be "TEXT")
+      responses:
+        '201':
+          description: success
         default:
           description: unexpected error
           content:
@@ -114,6 +422,13 @@ paths:
 components:
   schemas:
     Plugin:
+      example:
+        plugin_name: "TestPlugin"
+        server_name: "test_server_1"
+        file_name: "TestPlugin-1.0.jar"
+        version: "1.0"
+        type: "bukkit_plugin"
+        last_updated: 1715817600000
       allOf:
         - properties:
             plugin_name:
@@ -131,11 +446,10 @@ components:
             type:
               type: string
               description: Type of the plugin
-              example: "bukkit_plugin"
             last_updated:
               type: integer
               format: int64
-              description: Unix time when the plugin was last updated
+              description: Unix time when the plugin was last updated (milliseconds)
           required:
             - plugin_name
             - server_name
@@ -143,6 +457,53 @@ components:
             - version
             - type
             - last_updated
+    PluginInfo:
+      example:
+        installed_servers:
+          - plugin_name: "TestPlugin"
+            server_name: "test_server_1"
+            file_name: "TestPlugin-1.0.jar"
+            version: "1.0"
+            type: "bukkit_plugin"
+            last_updated: 1715817600000
+        custom_data: {
+          description: "This is a plugin for testing",
+          url: "https://example.com/test_plugin"
+        }
+      allOf:
+        - properties:
+            installed_servers:
+              type: array
+              items:
+                $ref: '#/components/schemas/Plugin'
+              description: Servers that have this plugin. This also provide data sent by its server.
+            custom_data:
+              type: object
+              description: User-defined information of this plugin
+              additionalProperties:
+                type: string
+    CustomDataKey:
+      example:
+        key: "url"
+        display_name: "Url"
+        description: "The url where the plugin is maintained"
+      allOf:
+        - properties:
+            key:
+              type: string
+              description: the key
+            display_name:
+              type: string
+              description: the display name of the key
+            description:
+              type: string
+              description: the description of the key
+            form_type:
+              type: string
+              description: the form type that is used in frontend
+          required:
+            - key
+            - form_type
     Error:
       required:
         - code
@@ -155,3 +516,12 @@ components:
         message:
           type: string
           description: Error message
+  securitySchemes:
+    Token:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      description: A token to create/edit/delete plugins via API
+  responses:
+    UnauthorizedError:
+      description: access token is missing or invalid
