@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getServerNames } from "../../api/backend.ts";
 import { isNonEmptyArray } from "../../utils/utils.tsx";
-import ToggleAllPluginListModeButton from "../atoms/toggleAllPluginListModeButton.tsx";
+import ToggleButton from "../atoms/toggleButton.tsx";
 import ServerList from "../molecules/serverList.tsx";
 
 export default function SideBar(props: {
@@ -60,9 +60,13 @@ function createServerList(
 				Click to change the server.
 			</p>
 			<ServerList list={serverList} consumer={onServerSelected} />
-			<ToggleAllPluginListModeButton
-				current={allPluginListMode}
-				onClick={changeAllPluginListMode}
+			<ToggleButton
+				display={
+					allPluginListMode
+						? "Click to show plugins per server"
+						: "Click to show all plugins"
+				}
+				onClick={() => changeAllPluginListMode(!allPluginListMode)}
 			/>
 		</>
 	);

@@ -5,7 +5,7 @@ export type PluginInfoValue = {
 	value: string;
 };
 
-export type PluginInfoMap = Map<string, PluginInfoValue>;
+export type PluginInfoMap = Map<string, PluginInfoValue>
 
 export async function fetchPluginInfo(pluginName: string) {
 	const data = await getPluginCustomData(pluginName);

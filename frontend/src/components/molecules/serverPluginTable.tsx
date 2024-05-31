@@ -10,10 +10,13 @@ import type { Plugin } from "../../api/backend.ts";
 import {
 	checkRowValueByFilter,
 	createFilterInput,
-	isNonEmptyArray,
 	makeSortableColumn,
-} from "../../utils/utils.tsx";
+} from "../../utils/table.tsx";
+import { isNonEmptyArray } from "../../utils/utils.tsx";
+
 import PluginCount from "../atoms/pluginCount.tsx";
+import TableBody from "../atoms/tableBody.tsx";
+import TableHeader from "../atoms/tableHeader.tsx";
 
 export default function ServerPluginTable(props: {
 	plugins: readonly Plugin[];
@@ -54,34 +57,16 @@ function createTable(plugins: [Plugin, ...Plugin[]]) {
 			</div>
 			<table className="table-fixed w-full">
 				<thead>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<tr key={headerGroup.id} className="text-center bg-gray-100">
-							{headerGroup.headers.map((header) => (
-								<th
-									key={header.id}
-									className="px-4 py-2 border border-gray-300"
-								>
-									{header.isPlaceholder
-										? null
-										: flexRender(
-												header.column.columnDef.header,
-												header.getContext(),
-											)}
-								</th>
-							))}
-						</tr>
-					))}
+					<TableHeader headerGroups={table.getHeaderGroups()} />
 				</thead>
 				<tbody>
-					{table.getRowModel().rows.map((row) => (
-						<tr key={row.id}>
-							{row.getVisibleCells().map((cell) => (
-								<td key={cell.id} className="px-4 py-2 border border-gray-300">
-									{flexRender(cell.column.columnDef.cell, cell.getContext())}
-								</td>
-							))}
-						</tr>
-					))}
+					<TableBody
+						rowModel={table.getRowModel()}
+						additionalClasses="px-4 py-2"
+						cellRenderer={(cell) =>
+							flexRender(cell.column.columnDef.cell, cell.getContext())
+						}
+					/>
 				</tbody>
 			</table>
 		</>

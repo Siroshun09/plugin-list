@@ -7,15 +7,16 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import type React from "react";
 import { FaEdit } from "react-icons/fa";
 import {
 	checkRowValueByFilter,
 	createFilterInput,
-	isNonEmptyArray,
 	makeSortableColumn,
-} from "../../utils/utils.tsx";
+} from "../../utils/table.tsx";
+import { isNonEmptyArray } from "../../utils/utils.tsx";
 import PluginCount from "../atoms/pluginCount.tsx";
+import TableBody from "../atoms/tableBody.tsx";
+import TableHeader from "../atoms/tableHeader.tsx";
 
 export default function AllPluginTable(props: {
 	plugins: readonly PluginInfo[];
@@ -63,32 +64,14 @@ function createTable(
 			</div>
 			<table className="table-fixed w-full">
 				<thead>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<tr key={headerGroup.id} className="text-center bg-gray-100">
-							{headerGroup.headers.map((header) => (
-								<th
-									key={header.id}
-									className="px-4 py-2 border border-gray-300"
-								>
-									{header.isPlaceholder
-										? null
-										: flexRender(
-												header.column.columnDef.header,
-												header.getContext(),
-											)}
-								</th>
-							))}
-						</tr>
-					))}
+					<TableHeader headerGroups={table.getHeaderGroups()} />
 				</thead>
 				<tbody>
-					{table.getRowModel().rows.map((row) => (
-						<tr key={row.id}>
-							{row
-								.getVisibleCells()
-								.map((cell) => renderCell(editorOpener, cell))}
-						</tr>
-					))}
+					<TableBody
+						rowModel={table.getRowModel()}
+						additionalClasses=""
+						cellRenderer={(cell) => renderCell(editorOpener, cell)}
+					/>
 				</tbody>
 			</table>
 		</>
@@ -132,9 +115,8 @@ function renderCell(
 	editorOpener: (pluginName: string) => void,
 	cell: Cell<PluginInfo, unknown>,
 ) {
-	let display: React.JSX.Element;
 	if (cell.column.id === "name") {
-		display = (
+		return (
 			<button
 				className="text-left w-full hover:bg-gray-100"
 				name="server-name"
@@ -147,17 +129,11 @@ function renderCell(
 				</div>
 			</button>
 		);
-	} else {
-		display = (
-			<div className="px-4 py-2">
-				{flexRender(cell.column.columnDef.cell, cell.getContext())}
-			</div>
-		);
 	}
 
 	return (
-		<td key={cell.id} className="border border-gray-300">
-			{display}
-		</td>
+		<div className="px-4 py-2">
+			{flexRender(cell.column.columnDef.cell, cell.getContext())}
+		</div>
 	);
 }

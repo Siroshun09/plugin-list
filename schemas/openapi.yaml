@@ -99,6 +99,13 @@ paths:
                     format: int64
                     description: Unix time when the plugin was last updated (milliseconds)
                     example: 1715817600000
+                required:
+                  - plugin_name
+                  - server_name
+                  - file_name
+                  - version
+                  - type
+                  - last_updated
       responses:
         '201':
           description: success
@@ -157,6 +164,11 @@ paths:
                   format: int64
                   description: Unix time when the plugin was last updated (milliseconds)
                   example: 1715817600000
+              required:
+                - file_name
+                - version
+                - type
+                - last_updated
       responses:
         '201':
           description: success
@@ -397,7 +409,7 @@ paths:
                   description: the description of the key
                 form_type:
                   type: string
-                  description: the form type that is used in frontend
+                  description: the form type that is used in frontend (If not specified, this value will be "TEXT")
       responses:
         '201':
           description: success

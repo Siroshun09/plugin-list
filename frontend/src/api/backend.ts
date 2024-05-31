@@ -15,7 +15,7 @@ export type AddCustomDataKeyInfoBody = {
   description?: string;
   /** the display name of the key */
   display_name?: string;
-  /** the form type that is used in frontend */
+  /** the form type that is used in frontend (If not specified, this value will be "TEXT") */
   form_type?: string;
 };
 
@@ -28,26 +28,26 @@ export type GetPluginCustomData200 = {[key: string]: string};
 
 export type AddPluginBody = {
   /** File name of the plugin */
-  file_name?: string;
+  file_name: string;
   /** Unix time when the plugin was last updated (milliseconds) */
-  last_updated?: number;
+  last_updated: number;
   /** Type of the plugin */
-  type?: string;
+  type: string;
   /** Version of the plugin */
-  version?: string;
+  version: string;
 };
 
 export type AddPluginsBodyItem = {
   /** File name of the plugin */
-  file_name?: string;
+  file_name: string;
   /** Unix time when the plugin was last updated (milliseconds) */
-  last_updated?: number;
+  last_updated: number;
   /** Name of the plugin */
-  plugin_name?: string;
+  plugin_name: string;
   /** Type of the plugin */
-  type?: string;
+  type: string;
   /** Version of the plugin */
-  version?: string;
+  version: string;
 };
 
 /**
