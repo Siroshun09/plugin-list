@@ -1,0 +1,12 @@
+name: Java CI (Gradle)
+on: [ push, pull_request ]
+
+jobs:
+  build-java-21:
+    uses: Siroshun09/gh-actions-workflows/.github/workflows/gradle.yml@v1
+    with:
+      java-version: '21'
+      upload-artifacts: true
+      working-dir: "./collector"
+      artifact-directory: "./collector/build"
+      package-name: PluginListCollector-Build-${{ github.run_number }}
