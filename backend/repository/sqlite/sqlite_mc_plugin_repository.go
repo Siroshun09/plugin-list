@@ -53,7 +53,6 @@ func (c *sqliteConnection) NewMCPluginRepository(ctx context.Context) (repositor
 
 func (m mcPluginRepository) CreateOrUpdateMCPlugin(ctx context.Context, plugin domain.MCPlugin) (returnErr error) {
 	rows, err := m.conn.db.QueryContext(ctx, insertOrUpdateMcPluginQuery, plugin.PluginName, plugin.ServerName, plugin.FileName, plugin.Version, plugin.Type, plugin.LastUpdated.UnixMilli())
-
 	if err != nil {
 		return err
 	}
@@ -70,7 +69,6 @@ func (m mcPluginRepository) CreateOrUpdateMCPlugin(ctx context.Context, plugin d
 
 func (m mcPluginRepository) DeleteMCPlugin(ctx context.Context, serverName string, pluginName string) (returnErr error) {
 	rows, err := m.conn.db.QueryContext(ctx, deleteMcPluginQuery, pluginName, serverName)
-
 	if err != nil {
 		return err
 	}
@@ -87,7 +85,6 @@ func (m mcPluginRepository) DeleteMCPlugin(ctx context.Context, serverName strin
 
 func (m mcPluginRepository) GetMCPluginsByServerName(ctx context.Context, serverName string) (plugins []domain.MCPlugin, returnErr error) {
 	rows, err := m.conn.db.QueryContext(ctx, selectMCPluginsByServerNameQuery, serverName)
-
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +97,6 @@ func (m mcPluginRepository) GetMCPluginsByServerName(ctx context.Context, server
 	}(rows)
 
 	var result []domain.MCPlugin
-
 	for rows.Next() {
 		var plugin domain.MCPlugin
 		var unixTime int64
@@ -116,7 +112,6 @@ func (m mcPluginRepository) GetMCPluginsByServerName(ctx context.Context, server
 
 func (m mcPluginRepository) GetServerNames(ctx context.Context) (serverNames []string, returnErr error) {
 	rows, err := m.conn.db.QueryContext(ctx, selectServerNamesQuery)
-
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +124,6 @@ func (m mcPluginRepository) GetServerNames(ctx context.Context) (serverNames []s
 	}(rows)
 
 	var result []string
-
 	for rows.Next() {
 		var serverName string
 		if err := rows.Scan(&serverName); err != nil {

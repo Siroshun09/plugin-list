@@ -33,7 +33,6 @@ type sqliteConnection struct {
 // CreateConnection は指定されたファイルパスの SQLite データベースとの接続を作成します。
 func CreateConnection(filepath string) (Connection, error) {
 	db, err := sql.Open("sqlite", filepath)
-
 	if err != nil {
 		return nil, err
 	}

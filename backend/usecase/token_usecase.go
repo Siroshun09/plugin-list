@@ -35,13 +35,11 @@ type tokenRepositoryUseCase struct {
 
 func (r tokenRepositoryUseCase) CreateNewRandomToken(ctx context.Context, length int) (*domain.Token, error) {
 	b := make([]byte, length)
-
 	if _, err := rand.Read(b); err != nil {
 		return nil, err
 	}
 
 	token := domain.Token{Value: hex.EncodeToString(b), Created: time.Now()}
-
 	if err := r.repo.AddToken(ctx, token); err != nil {
 		return nil, err
 	}

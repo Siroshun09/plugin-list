@@ -40,7 +40,6 @@ func (c *sqliteConnection) NewTokenRepository(ctx context.Context) (repository.T
 
 func (t tokenRepository) AddToken(ctx context.Context, token domain.Token) (returnErr error) {
 	rows, err := t.conn.db.QueryContext(ctx, insertTokenQuery, token.Value, token.Created.UnixMilli())
-
 	if err != nil {
 		return err
 	}
@@ -57,7 +56,6 @@ func (t tokenRepository) AddToken(ctx context.Context, token domain.Token) (retu
 
 func (t tokenRepository) RemoveToken(ctx context.Context, token string) (returnErr error) {
 	rows, err := t.conn.db.QueryContext(ctx, deleteTokenQuery, token)
-
 	if err != nil {
 		return err
 	}
@@ -72,9 +70,8 @@ func (t tokenRepository) RemoveToken(ctx context.Context, token string) (returnE
 	return nil
 }
 
-func (t tokenRepository) LoadTokens(ctx context.Context) (tokens []domain.Token, returnErr error) {
+func (t tokenRepository) LoadTokens(ctx context.Context) (_ []domain.Token, returnErr error) {
 	rows, err := t.conn.db.QueryContext(ctx, selectAllTokenQuery)
-
 	if err != nil {
 		return nil, err
 	}
@@ -87,11 +84,10 @@ func (t tokenRepository) LoadTokens(ctx context.Context) (tokens []domain.Token,
 	}(rows)
 
 	var result []domain.Token
-
 	for rows.Next() {
 		var token domain.Token
 		var createdAt int64
-		if err := rows.Scan(&token.Value, &createdAt); err != nil {
+		if err = rows.Scan(&token.Value, &createdAt); err != nil {
 			return nil, err
 		}
 		token.Created = time.UnixMilli(createdAt)
@@ -101,9 +97,8 @@ func (t tokenRepository) LoadTokens(ctx context.Context) (tokens []domain.Token,
 	return result, nil
 }
 
-func (t tokenRepository) ValidateToken(ctx context.Context, token string) (valid bool, returnErr error) {
+func (t tokenRepository) ValidateToken(ctx context.Context, token string) (_ bool, returnErr error) {
 	rows, err := t.conn.db.QueryContext(ctx, validateTokenQuery, token)
-
 	if err != nil {
 		return false, err
 	}
@@ -115,14 +110,13 @@ func (t tokenRepository) ValidateToken(ctx context.Context, token string) (valid
 		}
 	}(rows)
 
-	rows.Next()
-
-	var count int
-
-	err = rows.Scan(&count)
-	if err != nil {
-		return false, err
+	if rows.Next() {
+		var count int
+		if err = rows.Scan(&count); err != nil {
+			return false, err
+		}
+		return 0 < count, nil
+	} else {
+		return false, nil
 	}
-
-	return count != 0, nil
 }

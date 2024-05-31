@@ -43,14 +43,13 @@ func (p *PluginList) GetPluginsByServer(w http.ResponseWriter, r *http.Request, 
 
 	if err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to get plugins by serverName:", slog.String("serverName", serverName), err)
+		slog.Error("Failed to get plugins by a server name", slog.String("serverName", serverName), err)
 		return
 	}
 
 	result := make([]Plugin, len(plugins))
 	for i, plugin := range plugins {
-		converted := toPlugin(plugin)
-		result[i] = converted
+		result[i] = toPlugin(plugin)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -58,21 +57,25 @@ func (p *PluginList) GetPluginsByServer(w http.ResponseWriter, r *http.Request, 
 }
 
 func (p *PluginList) AddPlugins(w http.ResponseWriter, r *http.Request, serverName string) {
-	var plugins []Plugin
-
-	if err := json.NewDecoder(r.Body).Decode(&plugins); err != nil {
+	var requests AddPluginsJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&requests); err != nil {
 		sendError(w, http.StatusBadRequest, "Invalid format for Plugin array")
 		return
 	}
 
-	for _, plugin := range plugins {
-		plugin.ServerName = serverName
-
-		mcPlugin := toMCPlugin(plugin)
+	for _, request := range requests {
+		mcPlugin := domain.MCPlugin{
+			PluginName:  request.PluginName,
+			ServerName:  serverName,
+			FileName:    request.FileName,
+			Version:     request.Version,
+			Type:        request.Type,
+			LastUpdated: time.UnixMilli(request.LastUpdated),
+		}
 
 		if err := p.mcPluginUseCase.SubmitMCPlugin(r.Context(), mcPlugin); err != nil {
 			sendError(w, http.StatusInternalServerError, "Internal server error")
-			slog.Error("Failed to get plugins by serverName:", "request", &plugin, err)
+			slog.Error("Failed to process a plugin", slog.Any("request", request), err)
 			return
 		}
 	}
@@ -81,21 +84,24 @@ func (p *PluginList) AddPlugins(w http.ResponseWriter, r *http.Request, serverNa
 }
 
 func (p *PluginList) AddPlugin(w http.ResponseWriter, r *http.Request, serverName string, pluginName string) {
-	var plugin Plugin
-
-	if err := json.NewDecoder(r.Body).Decode(&plugin); err != nil {
+	var request AddPluginJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		sendError(w, http.StatusBadRequest, "Invalid format for Plugin")
 		return
 	}
 
-	plugin.PluginName = pluginName
-	plugin.ServerName = serverName
-
-	mcPlugin := toMCPlugin(plugin)
+	mcPlugin := domain.MCPlugin{
+		PluginName:  pluginName,
+		ServerName:  serverName,
+		FileName:    request.FileName,
+		Version:     request.Version,
+		Type:        request.Type,
+		LastUpdated: time.UnixMilli(request.LastUpdated),
+	}
 
 	if err := p.mcPluginUseCase.SubmitMCPlugin(r.Context(), mcPlugin); err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to get plugins by serverName:", "request", plugin, err)
+		slog.Error("Failed to process a plugin", slog.Any("request", request), err)
 		return
 	}
 
@@ -105,7 +111,7 @@ func (p *PluginList) AddPlugin(w http.ResponseWriter, r *http.Request, serverNam
 func (p *PluginList) DeletePlugin(w http.ResponseWriter, r *http.Request, serverName string, pluginName string) {
 	if err := p.mcPluginUseCase.DeleteMCPlugin(r.Context(), serverName, pluginName); err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to get plugins by serverName:", slog.String("server_name", serverName), slog.String("plugin_name", pluginName), err)
+		slog.Error("Failed to delete a plugin", slog.String("server_name", serverName), slog.String("plugin_name", pluginName), err)
 		return
 	}
 
@@ -116,7 +122,7 @@ func (p *PluginList) GetServerNames(w http.ResponseWriter, r *http.Request) {
 	serverNames, err := p.mcPluginUseCase.GetServerNames(r.Context())
 	if err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to the list of servers:", err)
+		slog.Error("Failed to get the list of servers", err)
 		return
 	}
 
@@ -139,12 +145,12 @@ func toMCPlugin(plugin Plugin) domain.MCPlugin {
 
 func toPlugin(p domain.MCPlugin) Plugin {
 	return Plugin{
-		FileName:    p.FileName,
-		LastUpdated: p.LastUpdated.UnixMilli(),
 		PluginName:  p.PluginName,
 		ServerName:  p.ServerName,
-		Type:        p.Type,
+		FileName:    p.FileName,
 		Version:     p.Version,
+		Type:        p.Type,
+		LastUpdated: p.LastUpdated.UnixMilli(),
 	}
 }
 
@@ -152,12 +158,11 @@ func (p *PluginList) GetCustomDataKeys(w http.ResponseWriter, r *http.Request) {
 	keys, err := p.customDataUseCase.GetKeys(r.Context())
 	if err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to get the custom data keys:", err)
+		slog.Error("Failed to get the custom data keys", err)
 		return
 	}
 
 	result := make([]CustomDataKey, len(keys))
-
 	for i, key := range keys {
 		result[i] = toAPICustomDataKey(key)
 	}
@@ -170,7 +175,7 @@ func (p *PluginList) GetCustomDataKeyInfo(w http.ResponseWriter, r *http.Request
 	keyInfo, err := p.customDataUseCase.SearchForKey(r.Context(), key)
 	if err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to get the custom data keys:", err)
+		slog.Error("Failed to search for the custom data key", slog.String("key", key), err)
 		return
 	}
 
@@ -183,18 +188,22 @@ func (p *PluginList) GetCustomDataKeyInfo(w http.ResponseWriter, r *http.Request
 }
 
 func (p *PluginList) AddCustomDataKeyInfo(w http.ResponseWriter, r *http.Request, key string) {
-	var keyInfo CustomDataKey
-
-	if err := json.NewDecoder(r.Body).Decode(&keyInfo); err != nil {
+	var request AddCustomDataKeyInfoJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		sendError(w, http.StatusBadRequest, "Invalid format for CustomDataKey")
 		return
 	}
 
-	keyInfo.Key = key
+	customDataKey := domain.CustomDataKey{
+		Key:         key,
+		DisplayName: nonNilOrElse(request.DisplayName, ""),
+		Description: nonNilOrElse(request.Description, ""),
+		FormType:    nonNilOrElse(request.FormType, "TEXT"),
+	}
 
-	if err := p.customDataUseCase.AddOrUpdateKey(r.Context(), toDomainCustomDataKey(keyInfo)); err != nil {
+	if err := p.customDataUseCase.AddOrUpdateKey(r.Context(), customDataKey); err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to update the custom data keys:", err)
+		slog.Error("Failed to add or update the custom data key", slog.String("key", key), slog.Any("request", request), err)
 	} else {
 		w.WriteHeader(http.StatusOK)
 	}
@@ -202,10 +211,9 @@ func (p *PluginList) AddCustomDataKeyInfo(w http.ResponseWriter, r *http.Request
 
 func (p *PluginList) GetPluginNames(w http.ResponseWriter, r *http.Request) {
 	pluginNames, err := p.mcPluginUseCase.GetPluginNames(r.Context())
-
 	if err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to get the list of plugins:", err)
+		slog.Error("Failed to get the list of plugins", err)
 		return
 	}
 
@@ -217,21 +225,19 @@ func (p *PluginList) GetPluginInfo(w http.ResponseWriter, r *http.Request, plugi
 	installInfo, err := p.mcPluginUseCase.GetInstalledPluginInfo(r.Context(), pluginName)
 	if err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to get the list of installed plugins:", err)
+		slog.Error("Failed to get the list of installed plugins", slog.String("pluginName", pluginName), err)
 		return
 	}
 
 	installedServers := make([]Plugin, len(installInfo))
-
 	for i, plugin := range installInfo {
 		installedServers[i] = toPlugin(plugin)
 	}
 
 	customDataMap, err := p.GetPluginCustomDataMap(r.Context(), pluginName)
-
 	if err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to get the plugin info:", err)
+		slog.Error("Failed to get the custom data of the plugin", slog.String("pluginName", pluginName), err)
 		return
 	}
 
@@ -246,10 +252,9 @@ func (p *PluginList) GetPluginInfo(w http.ResponseWriter, r *http.Request, plugi
 
 func (p *PluginList) GetPluginCustomData(w http.ResponseWriter, r *http.Request, pluginName string) {
 	customDataMap, err := p.GetPluginCustomDataMap(r.Context(), pluginName)
-
 	if err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to get the plugin info:", err)
+		slog.Error("Failed to get the custom data of the plugin", slog.String("pluginName", pluginName), err)
 		return
 	}
 
@@ -259,13 +264,11 @@ func (p *PluginList) GetPluginCustomData(w http.ResponseWriter, r *http.Request,
 
 func (p *PluginList) GetPluginCustomDataMap(ctx context.Context, pluginName string) (map[string]string, error) {
 	pluginInfo, err := p.customDataUseCase.GetPluginInfo(ctx, pluginName)
-
 	if err != nil {
 		return nil, err
 	}
 
 	customDataMap := make(map[string]string, len(pluginInfo))
-
 	for _, info := range pluginInfo {
 		customDataMap[info.Key] = info.Data
 	}
@@ -274,20 +277,18 @@ func (p *PluginList) GetPluginCustomDataMap(ctx context.Context, pluginName stri
 }
 
 func (p *PluginList) AddPluginCustomData(w http.ResponseWriter, r *http.Request, pluginName string) {
-	var body AddPluginCustomDataJSONRequestBody
-
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	var request AddPluginCustomDataJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		sendError(w, http.StatusBadRequest, "Invalid format for AddPluginCustomData")
 		return
 	}
 
-	customData := make([]domain.PluginCustomData, len(body))
-
+	customData := make([]domain.PluginCustomData, len(request))
 	i := 0
-	for key, data := range body {
+	for key, data := range request {
 		if exists, err := p.customDataUseCase.ExistsKey(r.Context(), key); err != nil {
 			sendError(w, http.StatusInternalServerError, "Internal server error")
-			slog.Error("Failed to check the custom data key:", err)
+			slog.Error("Failed to check the custom data key", slog.String("pluginName", pluginName), slog.String("key", key), slog.Any("data", data), err)
 			return
 		} else if !exists {
 			w.WriteHeader(http.StatusUnprocessableEntity)
@@ -300,7 +301,7 @@ func (p *PluginList) AddPluginCustomData(w http.ResponseWriter, r *http.Request,
 
 	if err := p.customDataUseCase.AddOrUpdatePluginInfo(r.Context(), pluginName, customData); err != nil {
 		sendError(w, http.StatusInternalServerError, "Internal server error")
-		slog.Error("Failed to update the custom data keys:", err)
+		slog.Error("Failed to add or update the custom data of the plugin:", slog.String("pluginName", pluginName), slog.Any("customData", customData), err)
 		return
 	}
 
@@ -317,25 +318,11 @@ func toAPICustomDataKey(key domain.CustomDataKey) CustomDataKey {
 	}
 }
 
-func toDomainCustomDataKey(key CustomDataKey) domain.CustomDataKey {
-	var displayName string
-	if key.DisplayName != nil {
-		displayName = *key.DisplayName
+// A function inspired by Java's Objects.requireNonNullElse(T, T)
+func nonNilOrElse[T any](val *T, def T) T {
+	if val == nil {
+		return def
 	} else {
-		displayName = ""
-	}
-
-	var description string
-	if key.Description != nil {
-		description = *key.Description
-	} else {
-		description = ""
-	}
-
-	return domain.CustomDataKey{
-		Key:         key.Key,
-		DisplayName: displayName,
-		Description: description,
-		FormType:    key.FormType,
+		return *val
 	}
 }

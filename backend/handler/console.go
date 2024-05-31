@@ -18,12 +18,6 @@ type command struct {
 	handler     func(input string)
 }
 
-var noArgs = make([]string, 0)
-
-func args(args ...string) []string {
-	return args
-}
-
 // HandleConsoleInput は標準入力からの入力を待機し、コンソールコマンドの実行を処理します。
 func HandleConsoleInput(tokenUseCase usecase.TokenUseCase, canceller context.CancelFunc) {
 	commands := initCommandMap(tokenUseCase)
@@ -78,15 +72,19 @@ func printNewLine() {
 
 func initCommandMap(tokenUseCase usecase.TokenUseCase) map[string]command {
 	return map[string]command{
-		"stop": {[]string{}, "Stop the application", func(string) {
+		"stop": newCmd("Stop the application", func(string) {
 			// do nothing; stop command will be handled in HandleConsoleInput
-		}},
-		"newtoken":        {args("{bytes}"), "Create a new token", createNewToken(tokenUseCase)},
-		"tokens":          {noArgs, "Show tokens", getTokens(tokenUseCase)},
-		"validatetoken":   {args("<token>"), "Validate the token", validateToken(tokenUseCase)},
-		"invalidatetoken": {args("<token>"), "Invalidate the token", invalidateToken(tokenUseCase)},
-		"cleartokens":     {noArgs, "Invalidate all tokens", clearTokens(tokenUseCase)},
+		}),
+		"newtoken":        newCmd("Create a new token", createNewToken(tokenUseCase), "{bytes}"),
+		"tokens":          newCmd("Show tokens", getTokens(tokenUseCase)),
+		"validatetoken":   newCmd("Validate the token", validateToken(tokenUseCase), "<token>"),
+		"invalidatetoken": newCmd("Invalidate the token", invalidateToken(tokenUseCase), "<token>"),
+		"cleartokens":     newCmd("Invalidate all tokens", clearTokens(tokenUseCase)),
 	}
+}
+
+func newCmd(description string, handler func(input string), args ...string) command {
+	return command{args, description, handler}
 }
 
 func createNewToken(tokenUseCase usecase.TokenUseCase) func(input string) {
@@ -96,19 +94,19 @@ func createNewToken(tokenUseCase usecase.TokenUseCase) func(input string) {
 		var length int
 
 		if len(args) == 2 {
-			var err error
-			length, err = strconv.Atoi(args[1])
-
-			if err != nil {
-				slog.Error("Invalid number", args[1], err)
+			if val, err := strconv.Atoi(args[1]); err != nil {
+				slog.Error("Invalid number:" + args[1])
 				return
+			} else if val <= 0 {
+				slog.Error("Length must be positive:" + args[1])
+			} else {
+				length = val
 			}
 		} else {
 			length = 16
 		}
 
 		token, err := tokenUseCase.CreateNewRandomToken(context.Background(), length)
-
 		if err != nil {
 			slog.Error("An error occurred while creating new token", err)
 			return
@@ -121,7 +119,6 @@ func createNewToken(tokenUseCase usecase.TokenUseCase) func(input string) {
 func getTokens(tokenUseCase usecase.TokenUseCase) func(string) {
 	return func(string) {
 		tokens, err := tokenUseCase.GetAllTokens(context.Background())
-
 		if err != nil {
 			slog.Error("An error occurred while creating new token", err)
 			return
@@ -200,7 +197,6 @@ func invalidateToken(tokenUseCase usecase.TokenUseCase) func(input string) {
 func clearTokens(tokenUseCase usecase.TokenUseCase) func(string) {
 	return func(string) {
 		tokens, err := tokenUseCase.GetAllTokens(context.Background())
-
 		if err != nil {
 			slog.Error("An error occurred while collecting tokens", err)
 			return
@@ -212,7 +208,7 @@ func clearTokens(tokenUseCase usecase.TokenUseCase) func(string) {
 		}
 
 		for _, token := range tokens {
-			if err := tokenUseCase.InvalidateToken(context.Background(), token.Value); err != nil {
+			if err = tokenUseCase.InvalidateToken(context.Background(), token.Value); err != nil {
 				slog.Error("An error occurred while invalidating the token", err)
 				return
 			}

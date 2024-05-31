@@ -21,6 +21,7 @@ const (
 			form_type VARCHAR(255) NOT NULL
 		)
 	`
+
 	pluginCustomDataTableSchema = `
 		CREATE TABLE IF NOT EXISTS plugin_custom_data (
 			plugin_name VARCHAR(32) NOT NULL,
@@ -62,7 +63,7 @@ func (c *sqliteConnection) NewCustomDataRepository(ctx context.Context) (reposit
 	return customDataRepository{c}, nil
 }
 
-func (c customDataRepository) GetKeys(ctx context.Context) (keys []domain.CustomDataKey, returnErr error) {
+func (c customDataRepository) GetKeys(ctx context.Context) (_ []domain.CustomDataKey, returnErr error) {
 	rows, err := c.conn.db.QueryContext(ctx, selectAllKeys)
 
 	if err != nil {
@@ -77,7 +78,6 @@ func (c customDataRepository) GetKeys(ctx context.Context) (keys []domain.Custom
 	}(rows)
 
 	var result []domain.CustomDataKey
-
 	for rows.Next() {
 		var key domain.CustomDataKey
 		if err = rows.Scan(&key.Key, &key.Description, &key.DisplayName, &key.FormType); err != nil {
@@ -89,9 +89,8 @@ func (c customDataRepository) GetKeys(ctx context.Context) (keys []domain.Custom
 	return result, nil
 }
 
-func (c customDataRepository) SearchForKey(ctx context.Context, key string) (result *domain.CustomDataKey, returnErr error) {
+func (c customDataRepository) SearchForKey(ctx context.Context, key string) (_ *domain.CustomDataKey, returnErr error) {
 	rows, err := c.conn.db.QueryContext(ctx, selectSpecifiedKey, key)
-
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +102,8 @@ func (c customDataRepository) SearchForKey(ctx context.Context, key string) (res
 		}
 	}(rows)
 
-	result = &domain.CustomDataKey{Key: key}
-
 	if rows.Next() {
+		result := &domain.CustomDataKey{Key: key}
 		if err = rows.Scan(&result.Description, &result.DisplayName, &result.FormType); err != nil {
 			return nil, err
 		}
@@ -117,7 +115,6 @@ func (c customDataRepository) SearchForKey(ctx context.Context, key string) (res
 
 func (c customDataRepository) AddOrUpdateKey(ctx context.Context, key domain.CustomDataKey) (returnErr error) {
 	rows, err := c.conn.db.QueryContext(ctx, insertOrUpdateKey, key.Key, key.Description, key.DisplayName, key.FormType)
-
 	if err != nil {
 		return err
 	}
@@ -154,7 +151,7 @@ func (c customDataRepository) ExistsKey(ctx context.Context, key string) (result
 	return false, nil
 }
 
-func (c customDataRepository) GetPluginInfo(ctx context.Context, pluginName string) (pluginData []domain.PluginCustomData, returnErr error) {
+func (c customDataRepository) GetPluginInfo(ctx context.Context, pluginName string) (_ []domain.PluginCustomData, returnErr error) {
 	rows, err := c.conn.db.QueryContext(ctx, selectPluginCustomData, pluginName)
 	if err != nil {
 		return nil, err
@@ -168,14 +165,11 @@ func (c customDataRepository) GetPluginInfo(ctx context.Context, pluginName stri
 	}(rows)
 
 	var result []domain.PluginCustomData
-
 	for rows.Next() {
 		var data domain.PluginCustomData
-
 		if err = rows.Scan(&data.Key, &data.Data); err != nil {
 			return nil, err
 		}
-
 		result = append(result, data)
 	}
 
@@ -184,7 +178,6 @@ func (c customDataRepository) GetPluginInfo(ctx context.Context, pluginName stri
 
 func (c customDataRepository) AddOrUpdatePluginInfo(ctx context.Context, pluginName string, data domain.PluginCustomData) (returnErr error) {
 	rows, err := c.conn.db.QueryContext(ctx, insertOrUpdatePluginCustomData, pluginName, data.Key, data.Data)
-
 	if err != nil {
 		return err
 	}
