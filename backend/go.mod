@@ -3,20 +3,20 @@ module github.com/Siroshun09/plugin-list
 go 1.22.3
 
 // v0.124.0 of kin-openapi introduces compilation errors: https://github.com/deepmap/oapi-codegen/issues/1533
-replace github.com/getkin/kin-openapi => github.com/getkin/kin-openapi v0.123.0
+replace github.com/getkin/kin-openapi => github.com/getkin/kin-openapi v0.125.0
 
 require (
-	github.com/deepmap/oapi-codegen/v2 v2.1.0
-	github.com/getkin/kin-openapi v0.124.0
+	github.com/deepmap/oapi-codegen/v2 v2.3.0
+	github.com/getkin/kin-openapi v0.125.0
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-chi/cors v1.2.1
 	github.com/lmittmann/tint v1.0.4
 	github.com/mattn/go-colorable v0.1.13
-	github.com/oapi-codegen/nethttp-middleware v1.0.1
+	github.com/oapi-codegen/nethttp-middleware v1.0.2
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.4.0
-	modernc.org/sqlite v1.29.10
+	modernc.org/sqlite v1.30.1
 )
 
 require (
