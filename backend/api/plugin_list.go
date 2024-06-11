@@ -1,4 +1,4 @@
-//go:generate go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen -config cfg.yaml ../../schemas/openapi.yaml
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config cfg.yaml ../../schemas/openapi.yaml
 
 package api
 
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// https://github.com/deepmap/oapi-codegen/blob/master/examples/petstore-expanded/chi/api/petstore.go
+// https://github.com/oapi-codegen/oapi-codegen/blob/master/examples/petstore-expanded/chi/api/petstore.go
 
 type PluginList struct {
 	mcPluginUseCase   usecase.MCPluginUseCase
