@@ -63,18 +63,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@biomejs/biome@npm:1.8.3":
-  version: 1.8.3
-  resolution: "@biomejs/biome@npm:1.8.3"
+"@biomejs/biome@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@biomejs/biome@npm:1.9.0"
   dependencies:
-    "@biomejs/cli-darwin-arm64": "npm:1.8.3"
-    "@biomejs/cli-darwin-x64": "npm:1.8.3"
-    "@biomejs/cli-linux-arm64": "npm:1.8.3"
-    "@biomejs/cli-linux-arm64-musl": "npm:1.8.3"
-    "@biomejs/cli-linux-x64": "npm:1.8.3"
-    "@biomejs/cli-linux-x64-musl": "npm:1.8.3"
-    "@biomejs/cli-win32-arm64": "npm:1.8.3"
-    "@biomejs/cli-win32-x64": "npm:1.8.3"
+    "@biomejs/cli-darwin-arm64": "npm:1.9.0"
+    "@biomejs/cli-darwin-x64": "npm:1.9.0"
+    "@biomejs/cli-linux-arm64": "npm:1.9.0"
+    "@biomejs/cli-linux-arm64-musl": "npm:1.9.0"
+    "@biomejs/cli-linux-x64": "npm:1.9.0"
+    "@biomejs/cli-linux-x64-musl": "npm:1.9.0"
+    "@biomejs/cli-win32-arm64": "npm:1.9.0"
+    "@biomejs/cli-win32-x64": "npm:1.9.0"
   dependenciesMeta:
     "@biomejs/cli-darwin-arm64":
       optional: true
@@ -94,62 +94,62 @@ __metadata:
       optional: true
   bin:
     biome: bin/biome
-  checksum: 10c0/95fe99ce82cd8242f1be51cbf3ac26043b253f5a369d3dc24df09bdb32ec04dba679b1d4fa8b9d602b1bf2c30ecd80af14aa8f5c92d6e0cd6214a99a1099a65b
+  checksum: 10c0/b07ad2c8dc3d52c0a4eea37f98d36399b33a13759903aa65f9678db916810b773fe94937c304899158479bccd8c3c90f0f30af22b34d6dc5963774f1acc5e245
   languageName: node
   linkType: hard
 
-"@biomejs/cli-darwin-arm64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "@biomejs/cli-darwin-arm64@npm:1.8.3"
+"@biomejs/cli-darwin-arm64@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@biomejs/cli-darwin-arm64@npm:1.9.0"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-darwin-x64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "@biomejs/cli-darwin-x64@npm:1.8.3"
+"@biomejs/cli-darwin-x64@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@biomejs/cli-darwin-x64@npm:1.9.0"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-arm64-musl@npm:1.8.3":
-  version: 1.8.3
-  resolution: "@biomejs/cli-linux-arm64-musl@npm:1.8.3"
+"@biomejs/cli-linux-arm64-musl@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@biomejs/cli-linux-arm64-musl@npm:1.9.0"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-arm64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "@biomejs/cli-linux-arm64@npm:1.8.3"
+"@biomejs/cli-linux-arm64@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@biomejs/cli-linux-arm64@npm:1.9.0"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-x64-musl@npm:1.8.3":
-  version: 1.8.3
-  resolution: "@biomejs/cli-linux-x64-musl@npm:1.8.3"
+"@biomejs/cli-linux-x64-musl@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@biomejs/cli-linux-x64-musl@npm:1.9.0"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-x64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "@biomejs/cli-linux-x64@npm:1.8.3"
+"@biomejs/cli-linux-x64@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@biomejs/cli-linux-x64@npm:1.9.0"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@biomejs/cli-win32-arm64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "@biomejs/cli-win32-arm64@npm:1.8.3"
+"@biomejs/cli-win32-arm64@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@biomejs/cli-win32-arm64@npm:1.9.0"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-win32-x64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "@biomejs/cli-win32-x64@npm:1.8.3"
+"@biomejs/cli-win32-x64@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@biomejs/cli-win32-x64@npm:1.9.0"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -1267,21 +1267,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:5.55.4":
-  version: 5.55.4
-  resolution: "@tanstack/query-core@npm:5.55.4"
-  checksum: 10c0/c463b582b8c7c24fddd8da9c6fd311805df48bbfbdf9feae5662cd6e3d1df3eba47a1fc0c6e7f3feed6e0add2e363fbfcaad25e931b1bda6da6aabdccf3e5898
+"@tanstack/query-core@npm:5.56.2":
+  version: 5.56.2
+  resolution: "@tanstack/query-core@npm:5.56.2"
+  checksum: 10c0/54ff55f02b01f6ba089f4965bfd46f430c18ce7e11d874de04c4d58cc8f698598b41e1c017ba029d08ae75e321e546b26f1ea7f788474db265eeba46e780f2f6
   languageName: node
   linkType: hard
 
 "@tanstack/react-query@npm:^5.55.4":
-  version: 5.55.4
-  resolution: "@tanstack/react-query@npm:5.55.4"
+  version: 5.56.2
+  resolution: "@tanstack/react-query@npm:5.56.2"
   dependencies:
-    "@tanstack/query-core": "npm:5.55.4"
+    "@tanstack/query-core": "npm:5.56.2"
   peerDependencies:
     react: ^18 || ^19
-  checksum: 10c0/b81f4e2942aa4e978278816e7939ac4df500cc38e052fd24c48e6ee5eddb89809b546e8536b50558f65ad679635ac0763ddfa3c14e73d60cfcf0646d5e57fd2a
+  checksum: 10c0/6e883b4ca1948f990215b7bce194251faf13a79c6ecf3f3c660af6c6788ed113ab629cefdafb496dfb04866f12dd48d7314e936b75c881b6749127b6496ac8fd
   languageName: node
   linkType: hard
 
@@ -2554,7 +2554,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "frontend@workspace:."
   dependencies:
-    "@biomejs/biome": "npm:1.8.3"
+    "@biomejs/biome": "npm:1.9.0"
     "@tanstack/react-query": "npm:^5.55.4"
     "@tanstack/react-table": "npm:^8.20.5"
     "@types/react": "npm:^18.3.5"
