@@ -11,9 +11,9 @@ require (
 	github.com/oapi-codegen/nethttp-middleware v1.0.2
 	github.com/oapi-codegen/oapi-codegen/v2 v2.4.1
 	github.com/oapi-codegen/runtime v1.1.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	go.uber.org/mock v0.5.0
-	modernc.org/sqlite v1.33.1
+	modernc.org/sqlite v1.34.2
 )
 
 require (
